@@ -77,7 +77,7 @@ formulaComposer.prototype.layerParser = function(data, depth) {
 		} else if(item == ')') {
 			return {
 				result: false,
-				key: idx,
+				col: idx,
 				stack: 'layerParser',
 				msg: "The bracket isn't opened"
 			};
