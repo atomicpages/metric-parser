@@ -150,7 +150,6 @@ formulaComposer.prototype.search = function(data, depth) {
 
 	if(typeof data === 'string') {
 		data = this.stringToArray(data);
-		console.log(data);
 	}
 
 	var result = this.layerParser(data, depth);
