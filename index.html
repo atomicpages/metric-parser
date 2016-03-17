@@ -1,0 +1,89 @@
+<html lang="ko">
+	<head>
+		<script type="text/javascript" src="src/formula.composer.js"></script>
+		<script>
+		//<![CDATA[
+			var formula1 = [12, '+', 3];                                     // 12 + 3
+			var formula2 = [6, '-', 2, '*', 4];                              // 6 - 2 * 4
+			var formula3 = [6, '-', 2, '*', 4, '/', '(', 2, '-', 4, ')'];    // 6 - 2 * 4 / (2 - 4)
+			var formula4 = [6, '+', 2, '*', '(', 3, '+', '(', 4, '/', 2, ')', '*', 4, '*', '(', 2, '+', '(', 4, '+', 2, '*', 6, ')', ')', '*', 2, ')'];    // 6 + 2 x (3 + (4 / 2) * 4 * (2 + (4 + 2 * 6))) * 2)
+			var formula5 = [5, 'x', 3, 'x', 6];                              // 5 * 3 * 6
+			var formula6 = '12 + 3+ (2*4+5)/2';
+			var formula7 = '((1 + 2';
+			var formula8 = '2 + 3))';
+			var formula9 = [1, '!', 2];
+
+			window.onload = function() {
+				document.getElementById('print1').innerHTML = JSON.stringify(new formulaComposer(formula1), null, '\t');
+				document.getElementById('print2').innerHTML = JSON.stringify(new formulaComposer(formula2), null, '\t');
+				document.getElementById('print3').innerHTML = JSON.stringify(new formulaComposer(formula3), null, '\t');
+				document.getElementById('print4').innerHTML = JSON.stringify(new formulaComposer(formula4), null, '\t');
+				document.getElementById('print5').innerHTML = JSON.stringify(new formulaComposer(formula5), null, '\t');
+				document.getElementById('print6').innerHTML = JSON.stringify(new formulaComposer(formula6), null, '\t');
+				document.getElementById('print7').innerHTML = JSON.stringify(new formulaComposer(formula7), null, '\t');
+				document.getElementById('print8').innerHTML = JSON.stringify(new formulaComposer(formula8), null, '\t');
+				document.getElementById('print9').innerHTML = JSON.stringify(new formulaComposer(formula9), null, '\t');
+			};
+		//]]>
+		</script>
+
+		<style>
+			.formula, .print {
+				padding: 20px;
+				background-color: #f2f2f2;
+				font-family: 'Consolas', 'Sans-serif';
+				font-size: 11px;
+				margin-bottom: 20px;
+
+			}
+
+			.print {
+				background-color: #f2faff;
+				margin-bottom: 80px;
+			}
+
+			.error {
+				background-color: #fff2f2;
+			}
+
+			.under {
+				text-decoration: line-through;
+				font-weight: 600;
+				color: #ff0000;
+			}
+		</style>
+	</head>
+
+	<body>
+		<h2>Compose</h2>
+
+		<div class="formula">[12, '+', 3]</div>
+		<div class="print" id="print1"></div>
+
+		<div class="formula">[6, '-', 2, '*', 4]</div>
+		<div class="print" id="print2"></div>
+
+		<div class="formula">[6, '-', 2, '*', 4, '/', '(', 2, '-', 4, ')']</div>
+		<div class="print" id="print3"></div>
+
+		<div class="formula">[6, '+', 2, '*', '(', 3, '+', '(', 4, '/', 2, ')', '*', 4, '*', '(', 2, '+', '(', 4, '+', 2, '*', 6, ')', ')', '*', 2, ')']</div>
+		<div class="print" id="print4"></div>
+
+		<div class="formula">[5, 'x', 3, 'x', 6]</div>
+		<div class="print" id="print5"></div>
+
+		<div class="formula">12 + 3+ (2*4+5)/2</div>
+		<div class="print" id="print6"></div>
+
+		<h2>Validation</h2>
+
+		<div class="formula">((1 + 2<span class="under">)</span><span class="under">)</span></div>
+		<div class="print error" id="print7"></div>
+
+		<div class="formula"><span class="under">(</span><span class="under">(</span>2 + 3))</div>
+		<div class="print error" id="print8"></div>
+
+		<div class="formula">[1, '!', 2]</div>
+		<div class="print error" id="print9"></div>
+	</body>
+</html>
