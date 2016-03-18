@@ -10,10 +10,10 @@
 			var formula4 = [6, '+', 2, '*', '(', 3, '+', '(', 4, '/', 2, ')', '*', 4, '*', '(', 2, '+', '(', 4, '+', 2, '*', 6, ')', ')', '*', 2, ')'];    // 6 + 2 x (3 + (4 / 2) * 4 * (2 + (4 + 2 * 6))) * 2)
 			var formula5 = [5, 'x', 3, 'x', 6];                              // 5 * 3 * 6
 			var formula6 = '12 + 3+ (2*4+5)/2';
-			var formula7 = '((1 + 2';
-			var formula8 = '2 + 3))';
-			var formula9 = [1, '!', 2];
-			var formula10 = '1';
+			var formula7 = ['(', 1, '+', 2, ')', '3'];
+			var formula8 = '((1 + 2';
+			var formula9 = '2 + 3))';
+			var formula10 = [1, '!', 2];
 
 			window.onload = function() {
 				document.getElementById('print1').innerHTML = JSON.stringify(new formulaComposer(formula1), null, '\t');
@@ -25,6 +25,7 @@
 				document.getElementById('print7').innerHTML = JSON.stringify(new formulaComposer(formula7), null, '\t');
 				document.getElementById('print8').innerHTML = JSON.stringify(new formulaComposer(formula8), null, '\t');
 				document.getElementById('print9').innerHTML = JSON.stringify(new formulaComposer(formula9), null, '\t');
+				document.getElementById('print10').innerHTML = JSON.stringify(new formulaComposer(formula10), null, '\t');
 			};
 		//]]>
 		</script>
@@ -50,6 +51,11 @@
 
 			.under {
 				text-decoration: line-through;
+				font-weight: 600;
+				color: #ff0000;
+			}
+
+			.error-string {
 				font-weight: 600;
 				color: #ff0000;
 			}
@@ -79,13 +85,16 @@
 
 		<h2>Validation</h2>
 
-		<div class="formula">((1 + 2<span class="under">)</span><span class="under">)</span></div>
+		<div class="formula">['(', 1, '+', 2, ')'<span class="error-string">, 3</span>]</div>
 		<div class="print error" id="print7"></div>
 
-		<div class="formula"><span class="under">(</span><span class="under">(</span>2 + 3))</div>
+		<div class="formula">((1 + 2<span class="under">)</span><span class="under">)</span></div>
 		<div class="print error" id="print8"></div>
 
-		<div class="formula">[1, '!', 2]</div>
+		<div class="formula"><span class="under">(</span><span class="under">(</span>2 + 3))</div>
 		<div class="print error" id="print9"></div>
+
+		<div class="formula">[1<span class="error-string">, '!'</span>, 2]</div>
+		<div class="print error" id="print10"></div>
 	</body>
 </html>
