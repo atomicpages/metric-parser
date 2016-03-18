@@ -1,3 +1,13 @@
+/************************************************************************************************************
+ *
+ * @ Version 1.0.1
+ * @ Formula Parser
+ * @ Date 03. 17. 2016
+ * @ Author PIGNOSE
+ * @ Licensed under MIT.
+ *
+ ***********************************************************************************************************/
+
 function formulaComposer(formula) {
 	this.formula = formula;
 	this.primaryPriority = ['*', 'x', '/', '%'];
@@ -39,6 +49,7 @@ formulaComposer.prototype.stringToArray = function(s) {
 }
 
 formulaComposer.prototype.layerParser = function(data, depth) {
+	var lastDepth = null;
 	for(var idx = 0; idx < data.length; idx++) {
 		var item = data[idx];
 		if(item == '(') {
@@ -58,7 +69,8 @@ formulaComposer.prototype.layerParser = function(data, depth) {
 						if(result.result == false) {
 							return result;
 						} else {
-							data.splice(idx, key - idx + 1, result.data)
+							data.splice(idx, key - idx + 1, result.data);
+							lastDepth = result.depth;
 						}
 						idx--;
 						break;
@@ -84,12 +96,13 @@ formulaComposer.prototype.layerParser = function(data, depth) {
 		}
 	}
 	return {
-		result: true
+		result: true,
+		depth: lastDepth || depth
 	};
 }
 
-formulaComposer.prototype.syntaxParser = function(data, depth, priority) {
-	if(data.length < 3) {
+formulaComposer.prototype.syntaxParser = function(data, depth, priority, lastDepth) {
+	if(data.length < 3 && ((lastDepth > 1) || (lastDepth == 1 && data.length > 1))) {
 		return {
 			result: false,
 			col: 0,
@@ -97,46 +110,58 @@ formulaComposer.prototype.syntaxParser = function(data, depth, priority) {
 			msg: 'Formula must has characters than 3 times'
 		}
 	}
-	for(var idx = 1; idx < data.length - 1; idx++) {
-		var item = data[idx];
-		if(this.inArray(item, this.permittedOperators) == -1 && !this.isOperand(item)) {
-			return {
-				result: false,
-				col: idx,
-				stack: 'syntaxParser',
-				msg: "'" + item + "' mark is not supported."
-			}
-		}
-		if(this.inArray(item, priority) != -1) {
-			if(!this.isOperand(data[idx - 1])) {
+
+	if(data.length > 2) {
+		for(var idx = 1; idx < data.length - 1; idx++) {
+			var item = data[idx];
+			if(this.inArray(item, this.permittedOperators) == -1 && !this.isOperand(item)) {
 				return {
 					result: false,
-					col: idx - 1,
-					stack: 'syntaxParser'
-				};
+					col: idx,
+					stack: 'syntaxParser',
+					msg: "'" + item + "' mark is not supported."
+				}
 			}
+			if(this.inArray(item, priority) != -1) {
+				if(!this.isOperand(data[idx - 1])) {
+					return {
+						result: false,
+						col: idx - 1,
+						stack: 'syntaxParser'
+					};
+				}
 
-			if(!this.isOperand(data[idx + 1])) {
-				return {
-					result: false,
-					col: idx + 1,
-					stack: 'syntaxParser'
-				};
-			}
+				if(!this.isOperand(data[idx + 1])) {
+					return {
+						result: false,
+						col: idx + 1,
+						stack: 'syntaxParser'
+					};
+				}
 
-			var o = {
-				operator: item,
-				operand1: data[idx - 1],
-				operand2: data[idx + 1]
-			};
-			data.splice(idx - 1, 3, o);
-			if(data.length == 1 && typeof data[0] === 'object') {
-				data = data[0];
+				var o = {
+					operator: item,
+					operand1: data[idx - 1],
+					operand2: data[idx + 1]
+				};
+				data.splice(idx - 1, 3, o);
+				if(data.length == 1 && typeof data[0] === 'object') {
+					data = data[0];
+				}
+				idx--;
+			} else {
 			}
-			idx--;
-		} else {
 		}
+	} else {
+		return {
+			result: true,
+			data: {
+				operator: '=',
+				operand1: data[0]
+			}
+		};
 	}
+
 	return {
 		result: true,
 		data: data
@@ -153,18 +178,19 @@ formulaComposer.prototype.search = function(data, depth) {
 	}
 
 	var result = this.layerParser(data, depth);
+	var lastDepth = result.depth;
 	if(result.result == false) {
 		return result;
 	}
 
-	var result = this.syntaxParser(data, depth, this.primaryPriority);
-	if(result.result == false) {
+	var result = this.syntaxParser(data, depth, this.primaryPriority, lastDepth);
+	if(result.result == false || lastDepth == 1) {
 		return result;
 	} else {
 		data = result.data;
 	}
 
-	var result = this.syntaxParser(data, depth, this.secondaryPriority);
+	var result = this.syntaxParser(data, depth, this.secondaryPriority, lastDepth);
 	if(result.result == false) {
 		return result;
 	} else {
@@ -173,7 +199,8 @@ formulaComposer.prototype.search = function(data, depth) {
 
 	return {
 		result: true,
-		data: data
+		data: data,
+		depth: lastDepth
 	}
 }
 

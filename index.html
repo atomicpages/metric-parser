@@ -1,5 +1,6 @@
 <html lang="ko">
 	<head>
+		<script type="text/javascript" src="demo/json.parser.js"></script>
 		<script type="text/javascript" src="src/formula.composer.js"></script>
 		<script>
 		//<![CDATA[
@@ -12,6 +13,7 @@
 			var formula7 = '((1 + 2';
 			var formula8 = '2 + 3))';
 			var formula9 = [1, '!', 2];
+			var formula10 = '1';
 
 			window.onload = function() {
 				document.getElementById('print1').innerHTML = JSON.stringify(new formulaComposer(formula1), null, '\t');
