@@ -1,6 +1,6 @@
 /************************************************************************************************************
  *
- * @ Version 1.0.4
+ * @ Version 1.0.5
  * @ Formula Parser
  * @ Date 03. 25. 2016
  * @ Author PIGNOSE
@@ -213,29 +213,36 @@ formulaComposer.prototype.syntaxParser = function(data, pos, depth, map, priorit
 formulaComposer.prototype.formulaParser = function(data, depth) {
 	var _this = this;
 	var formula = [];
-	if(typeof data.operator === 'undefined') {
+	if(typeof data.value === 'undefined') {
+		if(typeof data.operator === 'undefined') {
+			return {
+				result: false,
+				depth: depth,
+				col: 'operator unit',
+				stack: 'collapse',
+				msg: 'operator key must be in data'
+			};
+		} else if(typeof data.operand1 === 'undefined') {
+			return {
+				result: false,
+				depth: depth,
+				col: 'operand1 unit',
+				stack: 'collapse',
+				msg: 'operand1 key must be in data'
+			};
+		} else if(typeof data.operand2 === 'undefined') {
+			return {
+				result: false,
+				depth: depth,
+				col: 'operand2 unit',
+				stack: 'collapse',
+				msg: 'operand2 key must be in data'
+			};
+		}
+	} else {
 		return {
-			result: false,
-			depth: depth,
-			col: 'operator unit',
-			stack: 'collapse',
-			msg: 'operator key must be in data'
-		};
-	} else if(typeof data.operand1 === 'undefined') {
-		return {
-			result: false,
-			depth: depth,
-			col: 'operand1 unit',
-			stack: 'collapse',
-			msg: 'operand1 key must be in data'
-		};
-	} else if(typeof data.operand2 === 'undefined') {
-		return {
-			result: false,
-			depth: depth,
-			col: 'operand2 unit',
-			stack: 'collapse',
-			msg: 'operand2 key must be in data'
+			result: true,
+			data: ((data.value.type === 'unit')? data.value.unit:JSON.stringify(data.value))
 		};
 	}
 
@@ -312,9 +319,10 @@ formulaComposer.prototype.collapse = function(data, depth) {
 		depth = 1;
 	}
 	var formula = this.formulaParser(data, depth);
+	console.log(formula);
 	return {
 		result: true,
-		data: formula.data.join(' ')
+		data: formula.data
 	};
 }
 

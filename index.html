@@ -17,6 +17,8 @@
 			var formula11 = { "operator": "+", "operand1": 12, "operand2": 3 };
 			var formula12 = { "operator": "-", "operand1": 6, "operand2": { "operator": "*", "operand1": 2, "operand2": 4 } };
 			var formula13 = { "operator": "+", "operand1": { "operator": "+", "operand1": "12", "operand2": "3" }, "operand2": { "operator": "/", "operand1": { "operator": "+", "operand1": { "operator": "*", "operand1": "2", "operand2": "4" }, "operand2": "5" }, "operand2": "2" } };
+			var formula14 = { "operator": "*", "operand1": { "operator": "/", "operand1": { "value": { "type": "item", "item": { "table": "adb_report_5_data_hst", "key": "col_2", "name": "Item1", "oper": "sum" } } }, "operand2": { "value": { "type": "item", "item": { "table": "adb_report_5_data_hst", "key": "col_1", "name": "Item2", "oper": "sum" } } } }, "operand2": { "value": { "type": "unit", "unit": 100 } } };
+
 
 			window.onload = function() {
 				document.getElementById('print1').innerHTML = JSON.stringify(new formulaComposer(formula1), null, '\t');
@@ -32,6 +34,7 @@
 				document.getElementById('print11').innerHTML = JSON.stringify(new formulaComposer(formula11, true), null, '\t');
 				document.getElementById('print12').innerHTML = JSON.stringify(new formulaComposer(formula12, true), null, '\t');
 				document.getElementById('print13').innerHTML = JSON.stringify(new formulaComposer(formula13, true), null, '\t');
+				document.getElementById('print14').innerHTML = JSON.stringify(new formulaComposer(formula14, true), null, '\t');
 			};
 		//]]>
 		</script>
@@ -100,6 +103,10 @@
 
 		<div class="formula">{ "operator": "+", "operand1": { "operator": "+", "operand1": "12", "operand2": "3" }, "operand2": { "operator": "/", "operand1": { "operator": "+", "operand1": { "operator": "*", "operand1": "2", "operand2": "4" }, "operand2": "5" }, "operand2": "2" } }, "depth": 2 }</div>
 		<div class="print" id="print13"></div>
+
+		<h4>Advanced sample (custom value type[object])</h4>
+		<div class="formula">{ "operator": "*", "operand1": { "operator": "/", "operand1": { "value": { "type": "item", "item": { "table": "adb_report_5_data_hst", "key": "col_2", "name": "Item1", "oper": "sum" } } }, "operand2": { "value": { "type": "item", "item": { "table": "adb_report_5_data_hst", "key": "col_1", "name": "Item2", "oper": "sum" } } } }, "operand2": { "value": { "type": "unit", "unit": 100 } } }</div>
+		<div class="print" id="print14"></div>
 
 		<h2>Validation</h2>
 
