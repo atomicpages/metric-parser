@@ -14,6 +14,9 @@
 			var formula8 = '((1 + 2';
 			var formula9 = '2 + 3))';
 			var formula10 = [1, '!', 2];
+			var formula11 = { "operator": "+", "operand1": 12, "operand2": 3 };
+			var formula12 = { "operator": "-", "operand1": 6, "operand2": { "operator": "*", "operand1": 2, "operand2": 4 } };
+			var formula13 = { "operator": "+", "operand1": { "operator": "+", "operand1": "12", "operand2": "3" }, "operand2": { "operator": "/", "operand1": { "operator": "+", "operand1": { "operator": "*", "operand1": "2", "operand2": "4" }, "operand2": "5" }, "operand2": "2" } };
 
 			window.onload = function() {
 				document.getElementById('print1').innerHTML = JSON.stringify(new formulaComposer(formula1), null, '\t');
@@ -26,6 +29,9 @@
 				document.getElementById('print8').innerHTML = JSON.stringify(new formulaComposer(formula8), null, '\t');
 				document.getElementById('print9').innerHTML = JSON.stringify(new formulaComposer(formula9), null, '\t');
 				document.getElementById('print10').innerHTML = JSON.stringify(new formulaComposer(formula10), null, '\t');
+				document.getElementById('print11').innerHTML = JSON.stringify(new formulaComposer(formula11, true), null, '\t');
+				document.getElementById('print12').innerHTML = JSON.stringify(new formulaComposer(formula12, true), null, '\t');
+				document.getElementById('print13').innerHTML = JSON.stringify(new formulaComposer(formula13, true), null, '\t');
 			};
 		//]]>
 		</script>
@@ -63,7 +69,7 @@
 	</head>
 
 	<body>
-		<h2>Compose</h2>
+		<h2>Parse and convert formula -&gt; object</h2>
 
 		<div class="formula">[12, '+', 3]</div>
 		<div class="print" id="print1"></div>
@@ -82,6 +88,18 @@
 
 		<div class="formula">12 + 3+ (2*4+5)/2</div>
 		<div class="print" id="print6"></div>
+
+
+		<h2>Parse and convert object -&gt; formula</h2>
+
+		<div class="formula">{ "operator": "+", "operand1": 12, "operand2": 3 }</div>
+		<div class="print" id="print11"></div>
+
+		<div class="formula">{ "operator": "-", "operand1": 6, "operand2": { "operator": "*", "operand1": 2, "operand2": 4 } }</div>
+		<div class="print" id="print12"></div>
+
+		<div class="formula">{ "operator": "+", "operand1": { "operator": "+", "operand1": "12", "operand2": "3" }, "operand2": { "operator": "/", "operand1": { "operator": "+", "operand1": { "operator": "*", "operand1": "2", "operand2": "4" }, "operand2": "5" }, "operand2": "2" } }, "depth": 2 }</div>
+		<div class="print" id="print13"></div>
 
 		<h2>Validation</h2>
 
