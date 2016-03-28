@@ -18,6 +18,7 @@
 			var formula12 = { "operator": "-", "operand1": 6, "operand2": { "operator": "*", "operand1": 2, "operand2": 4 } };
 			var formula13 = { "operator": "+", "operand1": { "operator": "+", "operand1": "12", "operand2": "3" }, "operand2": { "operator": "/", "operand1": { "operator": "+", "operand1": { "operator": "*", "operand1": "2", "operand2": "4" }, "operand2": "5" }, "operand2": "2" } };
 			var formula14 = { "operator": "*", "operand1": { "operator": "/", "operand1": { "value": { "type": "item", "item": { "table": "adb_report_5_data_hst", "key": "col_2", "name": "Item1", "oper": "sum" } } }, "operand2": { "value": { "type": "item", "item": { "table": "adb_report_5_data_hst", "key": "col_1", "name": "Item2", "oper": "sum" } } } }, "operand2": { "value": { "type": "unit", "unit": 100 } } };
+			var formula15 = '((((1) + (2)) + (3)) + (4))';
 
 
 			window.onload = function() {
@@ -35,6 +36,7 @@
 				document.getElementById('print12').innerHTML = JSON.stringify(new formulaComposer(formula12, true), null, '\t');
 				document.getElementById('print13').innerHTML = JSON.stringify(new formulaComposer(formula13, true), null, '\t');
 				document.getElementById('print14').innerHTML = JSON.stringify(new formulaComposer(formula14, true), null, '\t');
+				document.getElementById('print15').innerHTML = JSON.stringify(new formulaComposer(formula15), null, '\t');
 			};
 		//]]>
 		</script>
@@ -91,6 +93,9 @@
 
 		<div class="formula">12 + 3+ (2*4+5)/2</div>
 		<div class="print" id="print6"></div>
+
+		<div class="formula">((((1) + (2)) + (3)) + (4))</div>
+		<div class="print" id="print15"></div>
 
 
 		<h2>Parse and convert object -&gt; formula</h2>

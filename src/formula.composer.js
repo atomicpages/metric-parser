@@ -1,8 +1,8 @@
 /************************************************************************************************************
  *
- * @ Version 1.0.6
+ * @ Version 1.0.7
  * @ Formula Parser
- * @ Date 03. 25. 2016
+ * @ Date 03. 28. 2016
  * @ Author PIGNOSE
  * @ Licensed under MIT.
  *
@@ -85,7 +85,7 @@ formulaComposer.prototype.layerParser = function (data, pos, depth, map) {
                     }
                 }
 
-                if (data.length == key + 1) {
+                if (data.length == key + 1 && innerDepth > 0) {
                     return {
                         result: false,
                         col: pos + key,
