@@ -1,8 +1,15 @@
 # FormulaParser
-Formula string parser. It can convert to object data.
 
-This is not necessary the jQuery library only pure javascript.
+The formula string parser, This plugin can change formula string to ```javascript object```.
 
-Support IE 7+ and any most browsers.
+It is supported the browser IE 7+ and any most browsers(Chrome, Firefox ..etc)
 
-[Check demo page](http://www.pigno.se/barn/PIGNOSE-FormulaParser/)
+[See demo](http://www.pigno.se/barn/PIGNOSE-FormulaParser/)
+
+----
+
+Do you have any question?
+
+I'd like to help your issue.
+
+Please contact to me to use either [gitter](https://gitter.im/KennethanCeyer/PIGNOSE) or [GitHub issues page](https://github.com/KennethanCeyer/FormulaParser/issues)
