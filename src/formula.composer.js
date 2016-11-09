@@ -1,52 +1,116 @@
 /************************************************************************************************************
  *
- * @ Version 1.0.7
- * @ Formula Parser
- * @ Date 03. 28. 2016
+ * @ Version 1.1.0
+ * @ FormulaParser
+ * @ Date 11. 09. 2016
  * @ Author PIGNOSE
  * @ Licensed under MIT.
  *
  ***********************************************************************************************************/
 
-function formulaComposer(formula, encode) {
+function FormulaParser(formula, encode) {
     this.formula = formula;
-    this.primaryPriority = ['*', 'x', '/', '%'];
-    this.secondaryPriority = ['+', '-', '&'];
-    this.permittedOperators = ['+', '-', '*', 'x', '/'];
-    this.permittedLetters = ['(', ')'].concat(this.permittedOperators);
+
+    /***********************************************
+     *
+     * @ Note OperandToken Declaration
+     *
+     **********************************************/
+
+    this.OperandToken = {};
+    this.OperandToken.Addition = ['+'];
+    this.OperandToken.Subtraction = ['-'];
+    this.OperandToken.Multiplication = ['x', '*'];
+    this.OperandToken.Division = ['/'];
+    this.OperandToken.Mod = ['%'];
+    this.OperandToken.Pow = ['^'];
+    this.OperandToken.Bracket = ['(', ')', '[', ']', '{', '}'];
+
+    /***********************************************
+     *
+     * @ Note Resitration the priority.
+     *
+     **********************************************/
+
+    this.OperandPriority = [];
+    this.OperandPriority[0] = [].concat(this.OperandToken.Mod, this.OperandToken.Pow);
+    this.OperandPriority[1] = [].concat(this.OperandToken.Multiplication, this.OperandToken.Division);
+    this.OperandPriority[2] = [].concat(this.OperandToken.Addition, this.OperandToken.Subtraction);
+
+    /***********************************************
+     *
+     * @ Note Resitration operators.
+     *
+     **********************************************/
+
+    this.Operators = [];
+    for(var idx in this.OperandToken) {
+    	var item = this.OperandToken[idx];
+    	this.Operators = this.Operators.concat(item);	
+    }
+
+    /***********************************************
+     *
+     * @ Note Resitration units.
+     *
+     **********************************************/
+
+    this.Units = [].concat(this.Operators, this.OperandToken.Bracket);
+
+
+
+    /***********************************************
+     *
+     * @ Note Resitration parsers.
+     *
+     **********************************************/
+
+    this.Parsers = [
+    	'LayerParser',
+    	'SyntaxParser'
+    ];
+
+    this.ParserMap = {};
+
+    for(var idx in this.Parsers) {
+    	var parser = this.Parsers[idx];
+    	this.ParserMap[parser] = parser;
+    }
+
+    this.Message = {};
+    this.Message[0x01] = 'Formula must has characters than {0} times';
+    this.Message[0x02] = '\'{0}\' operator is not supported.';
+    this.Message[0x03] = 'Left side operand is not valid.';
+    this.Message[0x04] = 'Right side operand is not valid.';
+    this.Message[0x05] = 'Bracket must be opened.';
+    this.Message[0x06] = 'Bracket must be closed.';
+
     return this.init(encode);
 }
 
-formulaComposer.prototype.getIndex = function (pos, map) {
-    try {
-        return map[pos] ? map[pos] : map[map.length - 1];
-    } catch (e) {
-        return 0;
-    }
-};
-
-formulaComposer.prototype.inArray = function (i, a) {
-    for (var idx in a) if (a[idx] == i) return idx;
+FormulaParser.prototype.inArray = function (i, a) {
+    for (var idx in a) if (a[idx] === i) return idx;
     return -1;
 };
 
-formulaComposer.prototype.isOperand = function (i) {
+FormulaParser.prototype.isOperand = function (i) {
     return typeof i === 'object' || this.isNumeric(i);
 };
 
-formulaComposer.prototype.isNumeric = function (n) {
+FormulaParser.prototype.isNumeric = function (n) {
     return (/\d+(\.\d*)?|\.\d+/).test(n);
 };
 
-formulaComposer.prototype.stringToArray = function (s) {
+FormulaParser.prototype.stringToArray = function (s) {
     var data = [];
-    var data_splited = s.split('');
-    for (var idx in data_splited) {
-        var item = data_splited[idx];
-        if (this.inArray(item, this.permittedLetters) == -1 && !this.isOperand(item)) {
-            continue;
+    var dataSplited = s.split('');
+    var dataSplitedLen = dataSplited.length;
+    for (var idx=0; idx<dataSplitedLen; idx++) {
+        var item = dataSplited[idx];
+        if (this.inArray(item, this.Units) === -1 && this.isOperand(item) === false) {
+            // continue;
         } else {
-            if (idx > 0 && this.isOperand(item) && this.isOperand(data[data.length - 1])) {
+            if (idx > 0 && this.isOperand(item) === true && this.isOperand(data[data.length - 1]) === true) {
                 data[data.length - 1] += item.toString();
             } else {
                 data.push(item);
@@ -56,171 +120,202 @@ formulaComposer.prototype.stringToArray = function (s) {
     return data;
 };
 
-formulaComposer.prototype.layerParser = function (data, pos, depth, map) {
-    var lastDepth = null;
-    var curIdx = pos;
+FormulaParser.prototype.log = function(code, data, mapping) {
+	var message = this.Message[code];
+
+	for(var idx in mapping) {
+		var item = mapping[idx];
+		message = message.replace(new RegExp('\\\{' + idx + '\\\}', 'g'), item);
+	}
+
+	var obj = {
+		status: code === 0x00,
+		code: code,
+		msg: message
+	};
+
+	if(typeof data !== 'undefined') {
+		for(var idx in data) {
+			var item = data[idx];
+			if(typeof item !== 'function') {
+				obj[idx] = item;
+			}
+		}
+	}
+
+	return obj;
+};
+
+FormulaParser.prototype.layerParser = function (data, pos, depth) {
+    var depth         = depth || 0;
+    var innerDepth    = 0;
+    var startPos      = [], endPos = [];
+    var currentParser = this.ParserMap.LayerParser;
+    var totalLength   = data.length;
+
+    if (data.length === 1 && typeof data[0] !== 'object') {
+		return {
+			status: true,
+			data: data[0],
+			length: 1
+		};
+
+		return data[0];
+	}
+
     for (var idx = 0; idx < data.length; idx++) {
         var item = data[idx];
-        if (item == '(') {
-            var innerDepth = 1;
-            for (var key = idx + 1; key < data.length; key++) {
-                var sub = data[key];
-                if (sub == '(') {
-                    innerDepth++;
-                } else if (sub == ')') {
-                    innerDepth--;
-                    if (innerDepth === 0) {
-                        var _data = [];
-                        for (var j = idx + 1; j < key; j++) {
-                            _data.push(data[j]);
-                        }
-                        var result = this.search(_data, pos + idx + 1, depth + 1);
-                        if (result.result === false) {
-                            return result;
-                        } else {
-                            data.splice(idx, key - idx + 1, result.data);
-                            curIdx = key + pos;
-                            lastDepth = result.depth;
-                        }
-                    }
+        if (item === '(') {
+            innerDepth++;
+            startPos[innerDepth] = idx + 1;
+        } else if (item === ')') {
+        	if(innerDepth < 1) {
+        		return this.log(0x05, {
+    				stack: currentParser,
+        			col: startPos.length > 0? startPos[startPos.length - 1]:0
+        		});
+        	}
+
+            if (innerDepth === 1) {
+                var paramData = [];
+                endPos[innerDepth] = idx - 1;
+
+                for (var j = startPos[innerDepth]; j <= endPos[innerDepth]; j++) {
+                    paramData.push(data[j]);
                 }
 
-                if (data.length == key + 1 && innerDepth > 0) {
-                    return {
-                        result: false,
-                        col: pos + key,
-                        stack: 'layerParser',
-                        msg: "The bracket isn't closed",
-                        map: map
-                    };
+                var result = this.search(paramData, pos + startPos[innerDepth] + 1, depth + 1);
+
+                if (result.status === false) {
+                    return result;
+                } else {
+                	var length = result.length;
+                	if(typeof result.data === 'object' && typeof result.data[0] !== 'object' && result.data.length === 1) {
+                		result.data = result.data[0];
+                	}
+                    data.splice(startPos[innerDepth] - 1, length + 2, result.data);
+                    idx -= length + 1;
                 }
             }
-        } else if (item == ')') {
-            return {
-                result: false,
-                col: pos,
-                stack: 'layerParser',
-                msg: "The bracket isn't opened",
-                map: map
-            };
+            innerDepth--;
         }
-        map.push(curIdx);
-        curIdx++;
     }
+
+    if(innerDepth > 0) {
+    	return this.log(0x06, {
+    		stack: currentParser,
+    		col: data.length || -1
+    	});
+    }
+
     return {
-        result: true,
-        depth: lastDepth || depth,
-        map: map
+        status: true,
+        depth: depth,
+        length: totalLength || -1
     };
 };
 
-formulaComposer.prototype.syntaxParser = function (data, pos, depth, map, priority, lastDepth) {
-    if ((data.length < 3 && lastDepth <= 1) || (lastDepth == 1 && data.length < 1)) {
-        return {
-            result: false,
-            col: pos,
-            stack: 'syntaxParser',
-            msg: 'Formula must has characters than 3 times'
-        };
+FormulaParser.prototype.syntaxParser = function (data, pos, depth, length, operators) {
+	this.currentParser = this.ParserMap.SyntaxParser;
+
+	data  = data  || [];
+	pos   = pos   || 0;
+	depth = depth || 0;
+
+	var cursor = pos;
+
+	if(typeof data[0][0] === 'object' && typeof data[0].operator === 'undefined') {
+		data[0] = data[0][0];
+	}
+
+	if (data.length < 3) {
+		if(data.length < 1 && typeof data[0] === 'object' && typeof data[0].operator !== 'undefined') {
+			return data[0];
+		} else {
+	        return this.log(0x01, {
+	            stack: this.currentParser,
+	            col: pos + (typeof data[0] === 'object'? data[0].length:0) + 1
+	        }, [3]);
+	    }
     }
 
     if (typeof data.length !== 'undefined') {
         if (data.length > 1) {
             for (var idx = 0; idx < data.length; idx++) {
+            	cursor = idx + pos;
                 var item = data[idx];
-                if (this.inArray(item, this.permittedOperators) == -1 && !this.isOperand(item)) {
-                    return {
-                        result: false,
-                        col: this.getIndex(pos + idx, map),
-                        stack: 'syntaxParser',
-                        msg: "'" + item + "' mark is not supported.",
-                        map: map
-                    };
+                if (this.inArray(item, this.Operators) === -1 && this.isOperand(item) === false) {
+			        return this.log(0x02, {
+			            stack: this.currentParser,
+			            col: cursor
+			        }, [item]);
                 }
-                if (this.inArray(item, priority) != -1) {
-                    if (!this.isOperand(data[idx - 1])) {
-                        return {
-                            result: false,
-                            col: this.getIndex(pos + idx - 1, map),
-                            stack: 'syntaxParser',
-                            msg: 'Left side operand is not valid.',
-                            map: map
-                        };
+
+                if (this.inArray(item, operators) !== -1) {
+                    if (this.isOperand(data[idx - 1]) === false) {
+				        return this.log(0x03, {
+				            stack: this.currentParser,
+				            col: cursor - 1
+				        });
                     }
 
-                    if (!this.isOperand(data[idx + 1])) {
-                        return {
-                            result: false,
-                            col: this.getIndex(pos + idx + 1, map),
-                            stack: 'syntaxParser',
-                            msg: 'Right side operand is not valid.',
-                            map: map
-                        };
+                    if (this.isOperand(data[idx + 1]) === false) {
+				        return this.log(0x04, {
+				            stack: this.currentParser,
+				            col: cursor + 1
+				        });
                     }
 
-                    var o = {
+                    data.splice(idx - 1, 3, {
                         operator: item,
                         operand1: data[idx - 1],
-                        operand2: data[idx + 1]
-                    };
-                    data.splice(idx - 1, 3, o);
-                    idx--;
-                } else if (this.isOperand(data[idx])) {
-                    if (idx - 1 > 0) {
-                        if (this.inArray(data[idx - 1], this.permittedOperators) == -1) {
-                            return {
-                                result: false,
-                                col: this.getIndex(pos + idx - 1, map),
-                                stack: 'syntaxParser',
-                                msg: 'Left side operator is not valid.',
-                                map: map
-                            };
-                        }
-                    }
+                        operand2: data[idx + 1],
+                        length: length
+                    });
 
-                    if (idx + 1 < data.length) {
-                        if (this.inArray(data[idx + 1], this.permittedOperators) == -1) {
-                            return {
-                                result: false,
-                                col: this.getIndex(pos + idx + 1, map),
-                                stack: 'syntaxParser',
-                                msg: 'Right side operator is not valid.',
-                                map: map
-                            };
-                        }
-                    }
+                   	if(typeof data[idx - 1][0] === 'object') {
+                   		data[idx - 1] = data[idx - 1][0];
+                   	}
+
+                    idx--;
                 }
-            }
-        } else {
-            if (lastDepth == 1) {
-                return {
-                    result: true,
-                    data: {
-                        operator: '=',
-                        operand1: data[0]
-                    }
-                };
             }
         }
     }
 
-    if (data.length == 1 && typeof data[0] === 'object') {
-        data = data[0];
-    }
-
     return {
-        result: true,
+        status: true,
         data: data
     };
 };
 
-formulaComposer.prototype.formulaParser = function (data, depth) {
+FormulaParser.prototype.filterLayer = function(data) {
+	if(typeof data[0] === 'object') {
+		data = data[0];
+	}
+
+	if(typeof data.operand1 === 'object') {
+		this.filterLayer(data.operand1);
+	}
+
+	if(typeof data.operand2 === 'object') {
+		this.filterLayer(data.operand2);
+	}
+
+	if(typeof data.length !== 'undefined') {
+		delete data.length;
+	}
+
+	return data;
+}
+
+FormulaParser.prototype.formulaParser = function (data, depth) {
     var _this = this;
     var formula = [];
     if (typeof data.value === 'undefined') {
         if (typeof data.operator === 'undefined') {
             return {
-                result: false,
+                status: false,
                 depth: depth,
                 col: 'operator unit',
                 stack: 'collapse',
@@ -228,7 +323,7 @@ formulaComposer.prototype.formulaParser = function (data, depth) {
             };
         } else if (typeof data.operand1 === 'undefined') {
             return {
-                result: false,
+                status: false,
                 depth: depth,
                 col: 'operand1 unit',
                 stack: 'collapse',
@@ -236,7 +331,7 @@ formulaComposer.prototype.formulaParser = function (data, depth) {
             };
         } else if (typeof data.operand2 === 'undefined') {
             return {
-                result: false,
+                status: false,
                 depth: depth,
                 col: 'operand2 unit',
                 stack: 'collapse',
@@ -245,7 +340,7 @@ formulaComposer.prototype.formulaParser = function (data, depth) {
         }
     } else {
         return {
-            result: true,
+            status: true,
             data: ((data.value.type === 'unit') ? data.value.unit : data.value)
         };
     }
@@ -255,7 +350,7 @@ formulaComposer.prototype.formulaParser = function (data, depth) {
         var param = params[idx];
         if (typeof data[param] === 'object') {
             var result = _this.formulaParser(data[param], depth + 1);
-            if (result.result === false) {
+            if (result.status === false) {
                 return result;
             } else {
                 formula = formula.concat(['('].concat(result.data).concat([')']));
@@ -271,65 +366,64 @@ formulaComposer.prototype.formulaParser = function (data, depth) {
     };
 };
 
-formulaComposer.prototype.search = function (data, pos, depth, map) {
-    if (typeof pos === 'undefined') {
-        pos = 0;
-    }
+FormulaParser.prototype.search = function (data, pos, depth) {
+	var _super = this;
+    pos   = pos   || 0;
+    depth = depth || 0;
 
-    if (typeof depth === 'undefined') {
-        depth = 1;
-    }
-    if (typeof map === 'undefined') {
-        map = [];
-    }
-
-    if (typeof data === 'string') {
+    if (typeof data === 'string' && depth < 1) {
         data = this.stringToArray(data);
     }
 
     var result = null;
+    var len = this.OperandPriority.length + 1;
+    var parserLength = 0;
+    var parserComplete = function() {
+    	if(depth === 0) {
+    		data = _super.filterLayer(data);
+    	}
 
-    result = this.layerParser(data, pos, depth, map);
-    var lastDepth = result.depth;
-    if (result.result === false) {
-        return result;
+    	return {
+	        status: true,
+	        data: data,
+	        length: depth === 0? undefined:parserLength,
+	        depth:  depth === 0? undefined:depth
+	    };
     }
 
-    result = this.syntaxParser(data, pos, depth, result.map, this.primaryPriority, lastDepth);
-    if (result.result === false) {
-        return result;
-    } else {
-        data = result.data;
-    }
+    for(var i=0; i<len; i++) {
+    	if(result !== null && typeof result.data !== 'undefined' && result.data.length === 1) {
+	    	return parserComplete.call();
+    	}
 
-    result = this.syntaxParser(data, pos, depth, result.map, this.secondaryPriority, lastDepth);
-    if (result.result === false) {
-        return result;
-    } else {
-        data = result.data;
-    }
+    	if(i === 0) {
+    		result = this.layerParser(data, pos, depth);
+    		parserLength = result.length;
+    	} else {
+    		result = this.syntaxParser(data, pos, depth, parserLength, this.OperandPriority[i - 1]);
+    	}
 
-    return {
-        result: true,
-        data: data,
-        depth: lastDepth,
-        map: result.map
-    };
+	    if (result.status === false) {
+	        return result;
+	    } else if(i + 1 === len) {
+	    	return parserComplete.call();
+	    }
+    }
 };
 
-formulaComposer.prototype.collapse = function (data, depth) {
+FormulaParser.prototype.collapse = function (data, depth) {
     var _this = this;
     if (typeof depth === 'undefined') {
         depth = 1;
     }
     var formula = this.formulaParser(data, depth);
     return {
-        result: true,
+        status: true,
         data: formula.data
     };
 };
 
-formulaComposer.prototype.init = function (encode) {
+FormulaParser.prototype.init = function (encode) {
     if (typeof encode === 'undefined' || encode === false) {
         return this.search(this.formula);
     } else {
