@@ -10,7 +10,7 @@ And the plugin be made by vanila js (pure javascript).
 
 ----
 
-> This plugin is related [Formula](https://github.com/KennethanCeyer/Formula) plugin.
+> This plugin is related [Formula plugin](https://github.com/KennethanCeyer/Formula).
 
 ----
 
@@ -27,6 +27,32 @@ And the plugin be made by vanila js (pure javascript).
 Advanced expression like `IF()`, `SUM()`, `AVG()`, `_CUSTOM_NAMED_FUNC_()` is in plan for next update.
 
 If you want join the contribution, Fork it and send a pull request.
+
+----
+
+### Installation
+
+#### Zip file download
+
+[Latest zip file link](https://github.com/KennethanCeyer/FormulaParser/archive/master.zip)
+
+#### Git
+
+```bash
+git clone git@github.com:KennethanCeyer/FormulaParser.git
+```
+
+#### Bower
+
+```bash
+bower install formula-parser
+```
+
+#### NPM
+
+```bash
+npm install formula-parser
+```
 
 ----
 
