@@ -1,0 +1,24 @@
+{
+  "name": "formula-parser",
+  "description": "Formula expression parser and validation library.\u001b[D",
+  "main": "index.html",
+  "authors": [
+    "PIGNOSE"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "Formula",
+    "Parser",
+    "VanilaJS",
+    "FormulaBuilder",
+    "Validator"
+  ],
+  "homepage": "https://github.com/KennethanCeyer/FormulaParser",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

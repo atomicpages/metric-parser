@@ -1,0 +1,34 @@
+{
+  "name": "formula-parser",
+  "version": "1.1.1",
+  "description": "Formula expression parser and validation library.\u001b[D",
+  "main": "index.html",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KennethanCeyer/FormulaParser.git"
+  },
+  "keywords": [
+    "Formula",
+    "Parser",
+    "VanilaJS",
+    "FormulaBuilder",
+    "Validator"
+  ],
+  "author": "PIGNOSE",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KennethanCeyer/FormulaParser/issues"
+  },
+  "homepage": "https://github.com/KennethanCeyer/FormulaParser#readme",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-cli": "^1.2.0",
+    "grunt-contrib-csslint": "^2.0.0",
+    "grunt-contrib-cssmin": "^1.0.2",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-uglify": "^2.0.0"
+  }
+}

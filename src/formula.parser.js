@@ -9,6 +9,8 @@
  ***********************************************************************************************************/
 
 function FormulaParser(formula, encode) {
+    var idx;
+
     this.formula = formula;
 
     /***********************************************
@@ -44,7 +46,7 @@ function FormulaParser(formula, encode) {
      **********************************************/
 
     this.Operators                   = [];
-    for(var idx in this.OperandToken) {
+    for(idx in this.OperandToken) {
     	var item = this.OperandToken[idx];
     	this.Operators = this.Operators.concat(item);	
     }
@@ -72,7 +74,7 @@ function FormulaParser(formula, encode) {
 
     this.ParserMap                   = {};
 
-    for(var idx in this.Parsers) {
+    for(idx in this.Parsers) {
     	var parser = this.Parsers[idx];
     	this.ParserMap[parser] = parser;
     }
@@ -190,10 +192,10 @@ FormulaParser.prototype.stringToArray = function (s) {
  * @return {array}
  */
 FormulaParser.prototype.log = function(code, data, mapping) {
-	var message = this.Message[code];
+	var message = this.Message[code], idx, item;
 
-	for(var idx in mapping) {
-		var item = mapping[idx];
+	for(idx in mapping) {
+		item = mapping[idx];
 		message = message.replace(new RegExp('\\\{' + idx + '\\\}', 'g'), item);
 	}
 
@@ -204,8 +206,8 @@ FormulaParser.prototype.log = function(code, data, mapping) {
 	};
 
 	if(typeof data !== 'undefined') {
-		for(var idx in data) {
-			var item = data[idx];
+		for(idx in data) {
+			item = data[idx];
 			if(typeof item !== 'function') {
 				obj[idx] = item;
 			}
@@ -226,11 +228,12 @@ FormulaParser.prototype.log = function(code, data, mapping) {
  * @return {Object}
  */
 FormulaParser.prototype.layerParser = function (data, pos, depth) {
-    var depth         = depth || 0;
     var innerDepth    = 0;
     var startPos      = [], endPos = [];
     var currentParser = this.ParserMap.LayerParser;
     var totalLength   = data.length;
+
+    depth             = depth || 0;
 
     if (data.length === 1 && typeof data[0] !== 'object') {
 		return {
@@ -238,8 +241,6 @@ FormulaParser.prototype.layerParser = function (data, pos, depth) {
 			data: data[0],
 			length: 1
 		};
-
-		return data[0];
 	}
 
     for (var idx = 0; idx < data.length; idx++) {
@@ -406,7 +407,7 @@ FormulaParser.prototype.filterParser = function(data) {
 	}
 
 	return data;
-}
+};
 
 /**
  * String parser is using for convert formula object to readable formula array.
@@ -463,8 +464,8 @@ FormulaParser.prototype.stringParser = function (data, depth, pos) {
                 return result;
             } else {
                 formula = formula.concat(result.data);
-                if(typeof data['operator'] !== 'undefined' && typeof result['operator'] !== 'undefined') {
-                    if(this.getOperatorPriority(data['operator']) < this.getOperatorPriority(result['operator']) && this.getOperatorPriority(data['operator']) !== -1) {
+                if(typeof data.operator !== 'undefined' && typeof result.operator !== 'undefined') {
+                    if(this.getOperatorPriority(data.operator) < this.getOperatorPriority(result.operator) && this.getOperatorPriority(data.operator) !== -1) {
                         formula.splice([formula.length - 3], 0, '(');
                         formula.splice([formula.length], 0, ')');
                     }
@@ -478,7 +479,7 @@ FormulaParser.prototype.stringParser = function (data, depth, pos) {
     return {
         status: true,
         data: formula,
-        operator: depth > 0? data['operator']:undefined
+        operator: depth > 0? data.operator:undefined
     };
 };
 
@@ -515,7 +516,7 @@ FormulaParser.prototype.search = function (data, pos, depth) {
 	        length: depth === 0? undefined:parserLength,
 	        depth:  depth === 0? undefined:depth
 	    };
-    }
+    };
 
     for(var i=0; i<len; i++) {
     	if(result !== null && typeof result.data !== 'undefined' && result.data.length === 1) {
