@@ -1,6 +1,6 @@
 /************************************************************************************************************
  *
- * @ Version 1.1.1
+ * @ Version 2.0.0
  * @ FormulaParser
  * @ Date 11. 10. 2016
  * @ Author PIGNOSE
@@ -8,9 +8,10 @@
  *
  ***********************************************************************************************************/
 
-function FormulaParser(formula, encode) {
-    var idx;
+var _PLUGIN_VERSION_ = '2.0.0';
 
+function FormulaParser(formula) {
+    var idx;
     this.formula = formula;
 
     /***********************************************
@@ -96,8 +97,18 @@ function FormulaParser(formula, encode) {
      *
      **********************************************/
 
-    return this.init(encode);
+    return this.init();
 }
+
+/**
+ * This method retuns current version. (This isn't prototype function.)
+ * @namespace FormulaParser
+ * @method getVersion
+ * @return {Number}
+ */
+FormulaParser.getVersion = function() {
+    return _PLUGIN_VERSION_;
+};
 
 /**
  * When item is in the array, This will returns true.
@@ -563,13 +574,14 @@ FormulaParser.prototype.collapse = function (data, depth) {
  * @namespace FormulaParser
  * @method init
  * @related FormulaParser object.
- * @param {Dynamic} encde - parse, unparse factor of determination.
  * @return {Dynamic}
  */
-FormulaParser.prototype.init = function (encode) {
-    if (typeof encode === 'undefined' || encode === false) {
+FormulaParser.prototype.init = function () {
+    if (typeof this.formula === 'string') {
         return this.search(this.formula);
-    } else {
+    } else if(typeof this.formula === 'object' && typeof this.formula.operator !== 'undefined') {
         return this.collapse(this.formula);
+    } else {
+        debug.error('Unkown type formula', this.formula);
     }
 };

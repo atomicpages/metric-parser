@@ -1,131 +1,299 @@
-<html lang="ko">
+<html lang="en">
 	<head>
-		<title>FormulaParser</title>
-		<script type="text/javascript" src="demo/json.parser.js"></script>
+		<meta charset="UTF-8" />
+		<meta property="og:url" content="http://www.pigno.se/barn/FormulaParser">
+		<meta property="og:type" content="product" />
+		<meta property="og:title" content="Formula Parser" />
+		<meta property="og:description" content="Formula string parser working in pure javascript." />
+		<title>Formula Parser</title>
+		<link rel="stylesheet" type="text/css" href="demo/css/semantic.ui.min.css">
+		<link rel="stylesheet" type="text/css" href="demo/css/prism.css" />
+		<link rel="stylesheet" type="text/css" href="demo/css/style.css" />
+		<style>
+			.formula-expression,
+			.formula-display {
+				text-align: left;
+				padding: 2em 2.4em;
+				background-color: #f8f8f8;
+				margin-bottom: 1em;
+				font-family: Consolas, sans-serif;
+				position: relative;
+			}
+
+			.formula-expression .formula-result,
+			.formula-display .formula-result {
+				min-width: 10em;
+				text-align: center;
+				display: block;
+				position: absolute;
+				padding: .4em .6em;
+				border: 1px solid #dadada;
+				border-right: 0;
+				border-top: 0;
+				background-color: #f0f0f0;
+				right: 0;
+				top: 0;
+				font-family: 'Raleway', sans-serif;
+				font-size: 85%;
+				font-weight: 600;
+			}
+
+			.formula-result span {
+				vertical-align: middle;
+			}
+
+			.formula-result .formula-status {
+				display: inline-block;
+				*display: inline;
+				*zoom: 1;
+				width: .4em;
+				height: .4em;
+				border-radius: 50%;
+				background-color: #d8d8d8;
+				margin-left: .6em;
+			}
+
+			.formula-expression {
+				font-weight: 600;
+				color: #000000;
+			}
+
+			.formula-display {
+				margin-bottom: 6em;
+			}
+
+			.formula-display.formula-display-success {
+				background-color: #f5f6f8;
+
+			}
+
+			.formula-display.formula-display-success .formula-status {
+				background-color: #60abac;
+			}
+
+			.formula-display.formula-display-error {
+				background-color: #f9f7f7;
+			}
+
+			.formula-display.formula-display-error .formula-status {
+				background-color: #e28080;
+			}
+
+			.formula-display:last-child {
+				margin-bottom: 0;
+			}
+		</style>
+		<script type="text/javascript" src="demo/js/jquery.latest.min.js"></script>
+		<script type="text/javascript" src="demo/js/semantic.ui.min.js"></script>
+		<script type="text/javascript" src="demo/js/prism.min.js"></script>
+		<script type="text/javascript" src="demo/js/json.parser.js"></script>
 		<script type="text/javascript" src="src/formula.parser.js"></script>
 		<script>
 		//<![CDATA[
-			var formula1 = [12, '+', 3];                                     // 12 + 3
-			var formula2 = [6, '-', 2, '*', 4];                              // 6 - 2 * 4
-			var formula3 = [6, '-', 2, '*', 4, '/', '(', 2, '-', 4, ')'];    // 6 - 2 * 4 / (2 - 4)
-			var formula4 = [6, '+', 2, '*', '(', 3, '+', '(', 4, '/', 2, ')', '*', 4, '*', '(', 2, '+', '(', 4, '+', 2, '*', 6, ')', ')', '*', 2, ')'];    // 6 + 2 x (3 + (4 / 2) * 4 * (2 + (4 + 2 * 6))) * 2)
-			var formula5 = [5, 'x', 3, 'x', 6];                              // 5 * 3 * 6
-			var formula6 = '12 + 3+ (2*4+5)/2';
-			var formula7 = ['(', 1, '+', 2, ')', '3'];
-			var formula8 = '((1 + 2';
-			var formula9 = '2 + 3))';
-			var formula10 = [1, '!', 2];
-			var formula11 = { "operator": "+", "operand1": 12, "operand2": 3 };
-			var formula12 = { "operator": "-", "operand1": 6, "operand2": { "operator": "*", "operand1": 2, "operand2": 4 } };
-			var formula13 = { "operator": "+", "operand1": { "operator": "+", "operand1": "12", "operand2": "3" }, "operand2": { "operator": "/", "operand1": { "operator": "+", "operand1": { "operator": "*", "operand1": "2", "operand2": "4" }, "operand2": "5" }, "operand2": "2" } };
-			var formula14 = { "operator": "*", "operand1": { "operator": "/", "operand1": { "value": { "type": "item", "item": { "table": "adb_report_5_data_hst", "key": "col_2", "name": "Item1", "oper": "sum" } } }, "operand2": { "value": { "type": "item", "item": { "table": "adb_report_5_data_hst", "key": "col_1", "name": "Item2", "oper": "sum" } } } }, "operand2": { "value": { "type": "unit", "unit": 100 } } };
-			var formula15 = '((((1) + (2)) + (3)) + (4))';
+			var formulaExpression = [
+				'12 + 3',                                                     // 01
+				'6 - 2 * 4',                                                  // 02
+				'6 - 2 * 4 / ( 2 - 4 )',                                      // 03
+				'6 + 2 * (3 + (4 / 2) * 4 * (2 + (4 + 2 * 6)) * 2)',          // 04
+				'6 + 4 ^ 2 ^ (4 + 2) / 5',                                    // 05
+				'((((1) + (2)) + (3)) + (4))',                                // 06
+				{                                                             // |--
+				   "operator":"+",                                            // |
+				   "operand1":12,                                             // - 07
+				   "operand2":3                                               // |
+				},                                                            // |--
+				{                                                             // |--
+				   "operator":"-",                                            // |
+				   "operand1":6,                                              // |
+				   "operand2":{                                               // - 08
+				      "operator":"*",                                         // |
+				      "operand1":2,                                           // |
+				      "operand2":4                                            // |
+				   }                                                          // |
+				},                                                            // |--
+				{                                                             // |--
+				   "operator":"+",                                            // |
+				   "operand1":{                                               // |
+				      "operator":"+",                                         // |
+				      "operand1":"12",                                        // |
+				      "operand2":"3"                                          // |
+				   },                                                         // |
+				   "operand2":{                                               // |
+				      "operator":"/",                                         // |
+				      "operand1":{                                            // |
+				         "operator":"+",                                      // - 09
+				         "operand1":{                                         // |
+				            "operator":"*",                                   // |
+				            "operand1":"2",                                   // |
+				            "operand2":"4"                                    // |
+				         },                                                   // |
+				         "operand2":"5"                                       // |
+				      },                                                      // |
+				      "operand2":"2"                                          // |
+				   }                                                          // |
+				},                                                            // |--
+				{                                                             // |--
+				   "operator":"*",                                            // |
+				   "operand1":{                                               // |
+				      "operator":"/",                                         // |
+				      "operand1":{                                            // |
+				         "value":{                                            // |
+				            "type":"item",                                    // |
+				            "item":{                                          // |
+				               "table":"table-01",                            // |
+				               "key":"col-02",                                // |
+				               "name":"Item1",                                // |
+				               "oper":"sum"                                   // |
+				            }                                                 // |
+				         }                                                    // |
+				      },                                                      // |
+				      "operand2":{                                            // - 10
+				         "value":{                                            // |
+				            "type":"item",                                    // |
+				            "item":{                                          // |
+				               "table":"table-02",                            // |
+				               "key":"col-04",                                // |
+				               "name":"Item2",                                // |
+				               "oper":"sum"                                   // |
+				            }                                                 // |
+				         }                                                    // |
+				      }                                                       // |
+				   },                                                         // |
+				   "operand2":{                                               // |
+				      "value":{                                               // |
+				         "type":"unit",                                       // |
+				         "unit":100                                           // |
+				      }                                                       // |
+				   }                                                          // |
+				},                                                            // |--
+				'(1 + 2) 3',                                                  // 11
+				'((1 + 2',                                                    // 12
+				'2 + 3))',                                                    // 13
+				'1 ! 2',                                                      // 14
+				'1 ++ 4'                                                      // 15
+			];
 
+			$(function() {
+				// This is for demo.
 
-			window.onload = function() {
-				document.getElementById('print1').innerHTML = JSON.stringify(new FormulaParser(formula1), null, '\t');
-				document.getElementById('print2').innerHTML = JSON.stringify(new FormulaParser(formula2), null, '\t');
-				document.getElementById('print3').innerHTML = JSON.stringify(new FormulaParser(formula3), null, '\t');
-				document.getElementById('print4').innerHTML = JSON.stringify(new FormulaParser(formula4), null, '\t');
-				document.getElementById('print5').innerHTML = JSON.stringify(new FormulaParser(formula5), null, '\t');
-				document.getElementById('print6').innerHTML = JSON.stringify(new FormulaParser(formula6), null, '\t');
-				document.getElementById('print7').innerHTML = JSON.stringify(new FormulaParser(formula7), null, '\t');
-				document.getElementById('print8').innerHTML = JSON.stringify(new FormulaParser(formula8), null, '\t');
-				document.getElementById('print9').innerHTML = JSON.stringify(new FormulaParser(formula9), null, '\t');
-				document.getElementById('print10').innerHTML = JSON.stringify(new FormulaParser(formula10), null, '\t');
-				document.getElementById('print11').innerHTML = JSON.stringify(new FormulaParser(formula11, true), null, '\t');
-				document.getElementById('print12').innerHTML = JSON.stringify(new FormulaParser(formula12, true), null, '\t');
-				document.getElementById('print13').innerHTML = JSON.stringify(new FormulaParser(formula13, true), null, '\t');
-				document.getElementById('print14').innerHTML = JSON.stringify(new FormulaParser(formula14, true), null, '\t');
-				document.getElementById('print15').innerHTML = JSON.stringify(new FormulaParser(formula15), null, '\t');
-			};
+				// Display a plugin version.
+				$('.version strong').text(FormulaParser.getVersion());
+
+				$('.formula-expression').each(function(i) {
+					var $this = $(this);
+					var $parent = $this.closest('.article');
+					if(typeof formulaExpression[i] !== 'undefined') {
+						var $formulaDisplay = $('<div class="formula-display"></div>');
+						var $formulaResult = $('<div class="formula-result"></div>');
+						var formula = new FormulaParser(formulaExpression[i]);
+						var expression = formulaExpression[i];
+						var json = JSON.stringify(formula, null, '/%t/').replace(/\n/g, "/%b/");
+						var jsonHtml = Prism.highlight(json, Prism.languages.json).replace(/\/%b\//mg, '<br />').replace(/\/%t\//mg, '&nbsp;&nbsp;&nbsp;&nbsp;');
+
+						if(typeof expression === 'object') {
+							expression = Prism.highlight(JSON.stringify(expression, null, '/%t/').replace(/\n/g, "/%b/"), Prism.languages.json).replace(/\/%b\//mg, '<br />').replace(/\/%t\//mg, '&nbsp;&nbsp;&nbsp;&nbsp;');
+						}
+
+						$this.html(expression);
+						$formulaDisplay.html(jsonHtml);
+						$formulaDisplay.insertAfter($this);
+						$formulaResult.clone().appendTo($this).text('Expression');
+						var $target = $formulaResult.clone().appendTo($formulaDisplay);
+						$target.append('<span>Result</span><span class="formula-status"></span>');
+
+						if(formula.status === true) {
+							$formulaDisplay.addClass('formula-display-success');
+						} else {
+							$formulaDisplay.addClass('formula-display-error');
+						}
+					}
+				});
+
+				$('.formula-display').each(function() {
+					var $this = $(this);	
+				});
+			});
 		//]]>
 		</script>
-
-		<style>
-			.formula, .print {
-				padding: 20px;
-				background-color: #f2f2f2;
-				font-family: 'Consolas', 'Sans-serif';
-				font-size: 11px;
-				margin-bottom: 20px;
-
-			}
-
-			.print {
-				background-color: #f2faff;
-				margin-bottom: 80px;
-			}
-
-			.error {
-				background-color: #fff2f2;
-			}
-
-			.under {
-				text-decoration: line-through;
-				font-weight: 600;
-				color: #ff0000;
-			}
-
-			.error-string {
-				font-weight: 600;
-				color: #ff0000;
-			}
-		</style>
 	</head>
 
 	<body>
-		<h2>Parse and convert formula -&gt; object</h2>
+		<div id="wrapper">
+			<div class="header">
+				<h1>Formula Parser</h1>
+				<a href="https://github.com/KennethanCeyer/FormulaParser" target="_blank" class="ui button primary">View project on Github</a> <a href="https://github.com/KennethanCeyer/FormulaParser/archive/master.zip" target="_blank" class="ui button teal">Download zip</a>
+				<h4 class="version">Latest version <strong></strong></h4>
+			</div>
+			<div class="article formula-parsing">
+				<h3>
+					<span>Formula Parsing</span>
+				</h3>
 
-		<div class="formula">[12, '+', 3]</div>
-		<div class="print" id="print1"></div>
-
-		<div class="formula">[6, '-', 2, '*', 4]</div>
-		<div class="print" id="print2"></div>
-
-		<div class="formula">[6, '-', 2, '*', 4, '/', '(', 2, '-', 4, ')']</div>
-		<div class="print" id="print3"></div>
-
-		<div class="formula">[6, '+', 2, '*', '(', 3, '+', '(', 4, '/', 2, ')', '*', 4, '*', '(', 2, '+', '(', 4, '+', 2, '*', 6, ')', ')', '*', 2, ')']</div>
-		<div class="print" id="print4"></div>
-
-		<div class="formula">[5, 'x', 3, 'x', 6]</div>
-		<div class="print" id="print5"></div>
-
-		<div class="formula">12 + 3+ (2*4+5)/2</div>
-		<div class="print" id="print6"></div>
-
-		<div class="formula">((((1) + (2)) + (3)) + (4))</div>
-		<div class="print" id="print15"></div>
+				<div class="formula-expression formula-expression-01"></div>
+				<div class="formula-expression formula-expression-02"></div>
+				<div class="formula-expression formula-expression-03"></div>
+				<div class="formula-expression formula-expression-04"></div>
+				<div class="formula-expression formula-expression-05"></div>
+				<div class="formula-expression formula-expression-06"></div>
+			</div>
 
 
-		<h2>Parse and convert object -&gt; formula</h2>
+			<div class="article">
+				<h3>
+					<span>Formula Unparsing</span>
+				</h3>
+				
+				<div class="formula-expression formula-expression-07"></div>
+				<div class="formula-expression formula-expression-08"></div>
+				<div class="formula-expression formula-expression-09"></div>
+				<div class="formula-expression formula-expression-10"></div>
+			</div>
 
-		<div class="formula">{ "operator": "+", "operand1": 12, "operand2": 3 }</div>
-		<div class="print" id="print11"></div>
+			<div class="article">
+				<h3>
+					<span>Validation</span>
+				</h3>
 
-		<div class="formula">{ "operator": "-", "operand1": 6, "operand2": { "operator": "*", "operand1": 2, "operand2": 4 } }</div>
-		<div class="print" id="print12"></div>
+				<div class="formula-expression formula-expression-11"></div>
+				<div class="formula-expression formula-expression-12"></div>
+				<div class="formula-expression formula-expression-13"></div>
+				<div class="formula-expression formula-expression-14"></div>
+				<div class="formula-expression formula-expression-15"></div>
+			</div>
+		</div>
+		<div id="bower" class="article">
+			<h3><span>bower</span></h3>
+			<blockquote><p>If you use bower.</p></blockquote>
+			<pre><code class="language-bash">bower install formula-parser</code></pre>
+		</div>
+		<div id="npm" class="article">
+			<h3><span>npm</span></h3>
+			<blockquote><p>If you use npm.</p></blockquote>
+			<pre><code class="language-bash">npm install formula-parser</code></pre>
+		</div>
+		<div id="sample" class="article">
+			<h3><span>Example</span></h3>
+			<br />
+			<ul class="ui top pointing secondary menu">
+				<a href="#" role="presentation" class="item active" data-tab="javascript">Javascript</a>
+			</ul>
+			<div role="tabpanel" class="ui tab segment active" data-tab="javascript">
+					<pre><code class="language-js">var formulaObject = null;
 
-		<div class="formula">{ "operator": "+", "operand1": { "operator": "+", "operand1": "12", "operand2": "3" }, "operand2": { "operator": "/", "operand1": { "operator": "+", "operand1": { "operator": "*", "operand1": "2", "operand2": "4" }, "operand2": "5" }, "operand2": "2" } }, "depth": 2 }</div>
-		<div class="print" id="print13"></div>
+// Formula Parsing
+var parsing = formulaObject = new FormulaParser('{expression}');
 
-		<h4>Advanced sample (custom value type[object])</h4>
-		<div class="formula">{ "operator": "*", "operand1": { "operator": "/", "operand1": { "value": { "type": "item", "item": { "table": "adb_report_5_data_hst", "key": "col_2", "name": "Item1", "oper": "sum" } } }, "operand2": { "value": { "type": "item", "item": { "table": "adb_report_5_data_hst", "key": "col_1", "name": "Item2", "oper": "sum" } } } }, "operand2": { "value": { "type": "unit", "unit": 100 } } }</div>
-		<div class="print" id="print14"></div>
+// Formula Unparsing
+var unparsing = new FormulaParser(formulaObject.data);
 
-		<h2>Validation</h2>
+// Formula Validation
+var formula = new FormulaParser('{Some invalid expression}');
+var isValid = formula.status === true;
 
-		<div class="formula">['(', 1, '+', 2, ')'<span class="error-string">, 3</span>]</div>
-		<div class="print error" id="print7"></div>
-
-		<div class="formula">((1 + 2<span class="under">)</span><span class="under">)</span></div>
-		<div class="print error" id="print8"></div>
-
-		<div class="formula"><span class="under">(</span><span class="under">(</span>2 + 3))</div>
-		<div class="print error" id="print9"></div>
-
-		<div class="formula">[1<span class="error-string">, '!'</span>, 2]</div>
-		<div class="print error" id="print10"></div>
+// true = Validated, false = Syntax Error.
+console.log(isValid);
+</code></pre>
+			</div>
+		</div>
 	</body>
 </html>
