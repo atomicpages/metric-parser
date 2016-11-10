@@ -1,5 +1,9 @@
 # FormulaParser
 
+[![npm version](https://badge.fury.io/js/pg-formula-parser.svg)](https://badge.fury.io/js/pg-formula-parser) [![Bower version](https://badge.fury.io/bo/pg-formula-parser.svg)](https://badge.fury.io/bo/pg-formula-parser) [![Join the chat at https://gitter.im/KennethanCeyer/PIGNOSE](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/KennethanCeyer/PIGNOSE?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+----
+
 **Formula Parser** can helps you make object of the formulas by parsing.
 
 This plugin provides validtor, parser and unparser.
