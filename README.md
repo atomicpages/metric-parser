@@ -45,13 +45,13 @@ git clone git@github.com:KennethanCeyer/FormulaParser.git
 #### Bower
 
 ```bash
-bower install formula-parser
+bower install pg-formula-parser
 ```
 
 #### NPM
 
 ```bash
-npm install formula-parser
+npm install pg-formula-parser
 ```
 
 ----

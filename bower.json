@@ -1,5 +1,5 @@
 {
-  "name": "formula-parser",
+  "name": "pg-formula-parser",
   "description": "Formula expression parser and validation library.",
   "main": "index.html",
   "authors": [
