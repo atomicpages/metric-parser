@@ -1,6 +1,6 @@
 /************************************************************************************************************
  *
- * @ Version 2.0.2
+ * @ Version 2.0.3
  * @ FormulaParser
  * @ Date 11. 10. 2016
  * @ Author PIGNOSE
@@ -8,7 +8,7 @@
  *
  ***********************************************************************************************************/
 
-var _PLUGIN_VERSION_ = '2.0.2';
+var _PLUGIN_VERSION_ = '2.0.3';
 
 function FormulaParser(formula) {
     var idx;
@@ -577,7 +577,7 @@ FormulaParser.prototype.collapse = function (data, depth) {
  * @return {Dynamic}
  */
 FormulaParser.prototype.init = function () {
-    if (typeof this.formula === 'string') {
+    if (typeof this.formula === 'string' || (typeof this.formula === 'object' && typeof this.formula.operator === 'undefined')) {
         return this.search(this.formula);
     } else if(typeof this.formula === 'object' && typeof this.formula.operator !== 'undefined') {
         return this.collapse(this.formula);
