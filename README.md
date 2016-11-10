@@ -10,7 +10,7 @@ And the plugin be made by vanila js (pure javascript).
 
 ----
 
-> This plugin is related [Formula plugin](https://github.com/KennethanCeyer/Formula).
+> This plugin is related with [Formula plugin](https://github.com/KennethanCeyer/Formula).
 
 ----
 
