@@ -1,6 +1,6 @@
 /************************************************************************************************************
  *
- * @ Version 2.0.4
+ * @ Version 2.0.5
  * @ FormulaParser
  * @ Date 11. 11. 2016
  * @ Author PIGNOSE
@@ -8,8 +8,8 @@
  *
  ***********************************************************************************************************/
 
-var FormulaParser = (function() {
-    var _PLUGIN_VERSION_ = '2.0.4';
+var FormulaParser = (function () {
+    var _PLUGIN_VERSION_ = '2.0.5';
 
     function FormulaParser(formula) {
         var idx;
@@ -21,14 +21,14 @@ var FormulaParser = (function() {
          *
          **********************************************/
 
-        this.OperandToken                = {};
-        this.OperandToken.Addition       = ['+'];
-        this.OperandToken.Subtraction    = ['-'];
+        this.OperandToken = {};
+        this.OperandToken.Addition = ['+'];
+        this.OperandToken.Subtraction = ['-'];
         this.OperandToken.Multiplication = ['x', '*'];
-        this.OperandToken.Division       = ['/'];
-        this.OperandToken.Mod            = ['%'];
-        this.OperandToken.Pow            = ['^'];
-        this.OperandToken.Bracket        = ['(', ')', '[', ']', '{', '}'];
+        this.OperandToken.Division = ['/'];
+        this.OperandToken.Mod = ['%'];
+        this.OperandToken.Pow = ['^'];
+        this.OperandToken.Bracket = ['(', ')', '[', ']', '{', '}'];
 
         /***********************************************
          *
@@ -36,10 +36,10 @@ var FormulaParser = (function() {
          *
          **********************************************/
 
-        this.OperandPriority             = [];
-        this.OperandPriority[0]          = [].concat(this.OperandToken.Mod, this.OperandToken.Pow);
-        this.OperandPriority[1]          = [].concat(this.OperandToken.Multiplication, this.OperandToken.Division);
-        this.OperandPriority[2]          = [].concat(this.OperandToken.Addition, this.OperandToken.Subtraction);
+        this.OperandPriority = [];
+        this.OperandPriority[0] = [].concat(this.OperandToken.Mod, this.OperandToken.Pow);
+        this.OperandPriority[1] = [].concat(this.OperandToken.Multiplication, this.OperandToken.Division);
+        this.OperandPriority[2] = [].concat(this.OperandToken.Addition, this.OperandToken.Subtraction);
 
         /***********************************************
          *
@@ -47,10 +47,10 @@ var FormulaParser = (function() {
          *
          **********************************************/
 
-        this.Operators                   = [];
-        for(idx in this.OperandToken) {
-        	var item = this.OperandToken[idx];
-        	this.Operators = this.Operators.concat(item);
+        this.Operators = [];
+        for (idx in this.OperandToken) {
+            var item = this.OperandToken[idx];
+            this.Operators = this.Operators.concat(item);
         }
 
         /***********************************************
@@ -59,7 +59,7 @@ var FormulaParser = (function() {
          *
          **********************************************/
 
-        this.Units                       = [].concat(this.Operators, this.OperandToken.Bracket);
+        this.Units = [].concat(this.Operators, this.OperandToken.Bracket);
 
         /***********************************************
          *
@@ -67,30 +67,30 @@ var FormulaParser = (function() {
          *
          **********************************************/
 
-        this.Parsers                     = [
+        this.Parsers = [
         	'LayerParser',
         	'SyntaxParser',
             'FilterParser',
             'StringParser'
         ];
 
-        this.ParserMap                   = {};
+        this.ParserMap = {};
 
-        for(idx in this.Parsers) {
-        	var parser = this.Parsers[idx];
-        	this.ParserMap[parser] = parser;
+        for (idx in this.Parsers) {
+            var parser = this.Parsers[idx];
+            this.ParserMap[parser] = parser;
         }
 
-        this.Message                     = {};
-        this.Message[0x01]               = 'Formula must has characters than {0} times';
-        this.Message[0x02]               = '\'{0}\' operator is not supported.';
-        this.Message[0x03]               = 'Left side operand is not valid.';
-        this.Message[0x04]               = 'Right side operand is not valid.';
-        this.Message[0x05]               = 'Bracket must be opened.';
-        this.Message[0x06]               = 'Bracket must be closed.';
-        this.Message[0x20]               = 'Operator\'s key must be in data.';
-        this.Message[0x21]               = 'Left operand\'s key must be in data.';
-        this.Message[0x22]               = 'Right operand\'s key must be in data.';
+        this.Message = {};
+        this.Message[0x01] = 'Formula must has characters than {0} times';
+        this.Message[0x02] = '\'{0}\' operator is not supported.';
+        this.Message[0x03] = 'Left side operand is not valid.';
+        this.Message[0x04] = 'Right side operand is not valid.';
+        this.Message[0x05] = 'Bracket must be opened.';
+        this.Message[0x06] = 'Bracket must be closed.';
+        this.Message[0x20] = 'Operator\'s key must be in data.';
+        this.Message[0x21] = 'Left operand\'s key must be in data.';
+        this.Message[0x22] = 'Right operand\'s key must be in data.';
 
         /***********************************************
          *
@@ -107,7 +107,7 @@ var FormulaParser = (function() {
      * @method getVersion
      * @return {Number}
      */
-    FormulaParser.getVersion = function() {
+    FormulaParser.getVersion = function () {
         return _PLUGIN_VERSION_;
     };
 
@@ -143,12 +143,12 @@ var FormulaParser = (function() {
      * @return {Number}
      */
     FormulaParser.prototype.getOperatorPriority = function (operator) {
-        if(this.inArray(operator, this.Operators) === -1) {
+        if (this.inArray(operator, this.Operators) === -1) {
             return -1;
         } else {
             var priority = -1;
-            for(var idx=0; idx<this.OperandPriority.length; idx++) {
-                if(this.inArray(operator, this.OperandPriority[idx]) !== -1) {
+            for (var idx = 0; idx < this.OperandPriority.length; idx++) {
+                if (this.inArray(operator, this.OperandPriority[idx]) !== -1) {
                     priority = idx;
                     break;
                 }
@@ -179,11 +179,9 @@ var FormulaParser = (function() {
         var data = [];
         var dataSplited = s.split('');
         var dataSplitedLen = dataSplited.length;
-        for (var idx=0; idx<dataSplitedLen; idx++) {
+        for (var idx = 0; idx < dataSplitedLen; idx++) {
             var item = dataSplited[idx];
-            if (this.inArray(item, this.Units) === -1 && this.isOperand(item) === false) {
-                // continue;
-            } else {
+            if (this.inArray(item, this.Units) !== -1 || this.isOperand(item) === true) {
                 if (idx > 0 && this.isOperand(item) === true && this.isOperand(data[data.length - 1]) === true) {
                     data[data.length - 1] += item.toString();
                 } else {
@@ -203,30 +201,30 @@ var FormulaParser = (function() {
      * @param {Array} mapping - return message mapping data
      * @return {array}
      */
-    FormulaParser.prototype.log = function(code, data, mapping) {
-    	var message = this.Message[code], idx, item;
+    FormulaParser.prototype.log = function (code, data, mapping) {
+        var message = this.Message[code], idx, item;
 
-    	for(idx in mapping) {
-    		item = mapping[idx];
-    		message = message.replace(new RegExp('\\\{' + idx + '\\\}', 'g'), item);
-    	}
+        for (idx in mapping) {
+            item = mapping[idx];
+            message = message.replace(new RegExp('\\\{' + idx + '\\\}', 'g'), item);
+        }
 
-    	var obj = {
-    		status: code === 0x00,
-    		code: code,
-    		msg: message
-    	};
+        var obj = {
+            status: code === 0x00,
+            code: code,
+            msg: message
+        };
 
-    	if(typeof data !== 'undefined') {
-    		for(idx in data) {
-    			item = data[idx];
-    			if(typeof item !== 'function') {
-    				obj[idx] = item;
-    			}
-    		}
-    	}
+        if (typeof data !== 'undefined') {
+            for (idx in data) {
+                item = data[idx];
+                if (typeof item !== 'function') {
+                    obj[idx] = item;
+                }
+            }
+        }
 
-    	return obj;
+        return obj;
     };
 
     /**
@@ -240,20 +238,20 @@ var FormulaParser = (function() {
      * @return {Object}
      */
     FormulaParser.prototype.layerParser = function (data, pos, depth) {
-        var innerDepth    = 0;
-        var startPos      = [], endPos = [];
+        var innerDepth = 0;
+        var startPos = [], endPos = [];
         var currentParser = this.ParserMap.LayerParser;
-        var totalLength   = data.length;
+        var totalLength = data.length;
 
-        depth             = depth || 0;
+        depth = depth || 0;
 
         if (data.length === 1 && typeof data[0] !== 'object') {
-    		return {
-    			status: true,
-    			data: data[0],
-    			length: 1
-    		};
-    	}
+            return {
+                status: true,
+                data: data[0],
+                length: 1
+            };
+        }
 
         for (var idx = 0; idx < data.length; idx++) {
             var item = data[idx];
@@ -261,12 +259,12 @@ var FormulaParser = (function() {
                 innerDepth++;
                 startPos[innerDepth] = idx + 1;
             } else if (item === ')') {
-            	if(innerDepth < 1) {
-            		return this.log(0x05, {
-        				stack: currentParser,
-            			col: startPos.length > 0? startPos[startPos.length - 1]:0
-            		});
-            	}
+                if (innerDepth < 1) {
+                    return this.log(0x05, {
+                        stack: currentParser,
+                        col: startPos.length > 0 ? startPos[startPos.length - 1] : 0
+                    });
+                }
 
                 if (innerDepth === 1) {
                     var paramData = [];
@@ -281,10 +279,10 @@ var FormulaParser = (function() {
                     if (result.status === false) {
                         return result;
                     } else {
-                    	var length = result.length;
-                    	if(typeof result.data === 'object' && typeof result.data[0] !== 'object' && result.data.length === 1) {
-                    		result.data = result.data[0];
-                    	}
+                        var length = result.length;
+                        if (typeof result.data === 'object' && typeof result.data[0] !== 'object' && result.data.length === 1) {
+                            result.data = result.data[0];
+                        }
                         data.splice(startPos[innerDepth] - 1, length + 2, result.data);
                         idx -= length + 1;
                     }
@@ -293,11 +291,11 @@ var FormulaParser = (function() {
             }
         }
 
-        if(innerDepth > 0) {
-        	return this.log(0x06, {
-        		stack: currentParser,
-        		col: data.length || -1
-        	});
+        if (innerDepth > 0) {
+            return this.log(0x06, {
+                stack: currentParser,
+                col: data.length || -1
+            });
         }
 
         return {
@@ -320,54 +318,54 @@ var FormulaParser = (function() {
      * @return {Object}
      */
     FormulaParser.prototype.syntaxParser = function (data, pos, depth, length, operators) {
-    	this.currentParser = this.ParserMap.SyntaxParser;
+        this.currentParser = this.ParserMap.SyntaxParser;
 
-    	data  = data  || [];
-    	pos   = pos   || 0;
-    	depth = depth || 0;
+        data = data || [];
+        pos = pos || 0;
+        depth = depth || 0;
 
-    	var cursor = pos;
+        var cursor = pos;
 
-    	if(typeof data[0][0] === 'object' && typeof data[0].operator === 'undefined') {
-    		data[0] = data[0][0];
-    	}
+        if (typeof data[0] !== 'undefined' && typeof data[0][0] === 'object' && typeof data[0].operator === 'undefined') {
+            data[0] = data[0][0];
+        }
 
-    	if (data.length < 3) {
-    		if(data.length <= 1 && typeof data[0] === 'object' && typeof data[0].operator !== 'undefined') {
-    			return data[0];
-    		} else {
-    	        return this.log(0x01, {
-    	            stack: this.currentParser,
-    	            col: pos + (typeof data[0] === 'object'? data[0].length:0) + 1
-    	        }, [3]);
-    	    }
+        if (data.length < 3) {
+            if (data.length <= 1 && typeof data[0] === 'object' && typeof data[0].operator !== 'undefined') {
+                return data[0];
+            } else {
+                return this.log(0x01, {
+                    stack: this.currentParser,
+                    col: pos + (typeof data[0] === 'object' ? data[0].length : 0) + 1
+                }, [3]);
+            }
         }
 
         if (typeof data.length !== 'undefined') {
             if (data.length > 1) {
                 for (var idx = 0; idx < data.length; idx++) {
-                	cursor = idx + pos;
+                    cursor = idx + pos;
                     var item = data[idx];
                     if (this.inArray(item, this.Operators) === -1 && this.isOperand(item) === false) {
-    			        return this.log(0x02, {
-    			            stack: this.currentParser,
-    			            col: cursor
-    			        }, [item]);
+                        return this.log(0x02, {
+                            stack: this.currentParser,
+                            col: cursor
+                        }, [item]);
                     }
 
                     if (this.inArray(item, operators) !== -1) {
                         if (this.isOperand(data[idx - 1]) === false) {
-    				        return this.log(0x03, {
-    				            stack: this.currentParser,
-    				            col: cursor - 1
-    				        });
+                            return this.log(0x03, {
+                                stack: this.currentParser,
+                                col: cursor - 1
+                            });
                         }
 
                         if (this.isOperand(data[idx + 1]) === false) {
-    				        return this.log(0x04, {
-    				            stack: this.currentParser,
-    				            col: cursor + 1
-    				        });
+                            return this.log(0x04, {
+                                stack: this.currentParser,
+                                col: cursor + 1
+                            });
                         }
 
                         data.splice(idx - 1, 3, {
@@ -377,9 +375,9 @@ var FormulaParser = (function() {
                             length: length
                         });
 
-                       	if(typeof data[idx - 1][0] === 'object') {
-                       		data[idx - 1] = data[idx - 1][0];
-                       	}
+                        if (typeof data[idx - 1][0] === 'object') {
+                            data[idx - 1] = data[idx - 1][0];
+                        }
 
                         idx--;
                     }
@@ -401,24 +399,24 @@ var FormulaParser = (function() {
      * @param {Object} data - formula object
      * @return {Object}
      */
-    FormulaParser.prototype.filterParser = function(data) {
-    	if(typeof data[0] === 'object') {
-    		data = data[0];
-    	}
+    FormulaParser.prototype.filterParser = function (data) {
+        if (typeof data[0] === 'object') {
+            data = data[0];
+        }
 
-    	if(typeof data.operand1 === 'object') {
-    		this.filterParser(data.operand1);
-    	}
+        if (typeof data.operand1 === 'object') {
+            this.filterParser(data.operand1);
+        }
 
-    	if(typeof data.operand2 === 'object') {
-    		this.filterParser(data.operand2);
-    	}
+        if (typeof data.operand2 === 'object') {
+            this.filterParser(data.operand2);
+        }
 
-    	if(typeof data.length !== 'undefined') {
-    		delete data.length;
-    	}
+        if (typeof data.length !== 'undefined') {
+            delete data.length;
+        }
 
-    	return data;
+        return data;
     };
 
     /**
@@ -438,7 +436,7 @@ var FormulaParser = (function() {
         var formula = [];
 
         depth = depth || 0;
-        pos   = pos   || 0;
+        pos = pos || 0;
 
         if (typeof data.value === 'undefined') {
             if (typeof data.operator === 'undefined') {
@@ -468,7 +466,7 @@ var FormulaParser = (function() {
         }
 
         var params = ['operand1', 'operator', 'operand2'];
-        for (var idx=0; idx<params.length; idx++) {
+        for (var idx = 0; idx < params.length; idx++) {
             var param = params[idx];
             if (typeof data[param] === 'object') {
                 var result = _this.stringParser(data[param], depth + 1, pos + idx);
@@ -476,8 +474,8 @@ var FormulaParser = (function() {
                     return result;
                 } else {
                     formula = formula.concat(result.data);
-                    if(typeof data.operator !== 'undefined' && typeof result.operator !== 'undefined') {
-                        if(this.getOperatorPriority(data.operator) < this.getOperatorPriority(result.operator) && this.getOperatorPriority(data.operator) !== -1) {
+                    if (typeof data.operator !== 'undefined' && typeof result.operator !== 'undefined') {
+                        if (this.getOperatorPriority(data.operator) < this.getOperatorPriority(result.operator) && this.getOperatorPriority(data.operator) !== -1) {
                             formula.splice([formula.length - 3], 0, '(');
                             formula.splice([formula.length], 0, ')');
                         }
@@ -491,7 +489,7 @@ var FormulaParser = (function() {
         return {
             status: true,
             data: formula,
-            operator: depth > 0? data.operator:undefined
+            operator: depth > 0 ? data.operator : undefined
         };
     };
 
@@ -506,8 +504,8 @@ var FormulaParser = (function() {
      * @return {Object}
      */
     FormulaParser.prototype.search = function (data, pos, depth) {
-    	var _super = this;
-        pos   = pos   || 0;
+        var _super = this;
+        pos = pos || 0;
         depth = depth || 0;
 
         if (typeof data === 'string' && depth < 1) {
@@ -517,36 +515,36 @@ var FormulaParser = (function() {
         var result = null;
         var len = this.OperandPriority.length + 1;
         var parserLength = 0;
-        var parserComplete = function() {
-        	if(depth === 0) {
-        		data = _super.filterParser(data);
-        	}
+        var parserComplete = function () {
+            if (depth === 0) {
+                data = _super.filterParser(data);
+            }
 
-        	return {
-    	        status: true,
-    	        data: data,
-    	        length: depth === 0? undefined:parserLength,
-    	        depth:  depth === 0? undefined:depth
-    	    };
+            return {
+                status: true,
+                data: data,
+                length: depth === 0 ? undefined : parserLength,
+                depth: depth === 0 ? undefined : depth
+            };
         };
 
-        for(var i=0; i<len; i++) {
-        	if(result !== null && typeof result.data !== 'undefined' && result.data.length === 1) {
-    	    	return parserComplete.call();
-        	}
+        for (var i = 0; i < len; i++) {
+            if (result !== null && typeof result.data !== 'undefined' && result.data.length === 1) {
+                return parserComplete.call();
+            }
 
-        	if(i === 0) {
-        		result = this.layerParser(data, pos, depth);
-        		parserLength = result.length;
-        	} else {
-        		result = this.syntaxParser(data, pos, depth, parserLength, this.OperandPriority[i - 1]);
-        	}
+            if (i === 0) {
+                result = this.layerParser(data, pos, depth);
+                parserLength = result.length;
+            } else {
+                result = this.syntaxParser(data, pos, depth, parserLength, this.OperandPriority[i - 1]);
+            }
 
-    	    if (result.status === false) {
-    	        return result;
-    	    } else if(i + 1 === len) {
-    	    	return parserComplete.call();
-    	    }
+            if (result.status === false) {
+                return result;
+            } else if (i + 1 === len) {
+                return parserComplete.call();
+            }
         }
     };
 
@@ -580,7 +578,7 @@ var FormulaParser = (function() {
     FormulaParser.prototype.init = function () {
         if (typeof this.formula === 'string' || (typeof this.formula === 'object' && typeof this.formula.operator === 'undefined')) {
             return this.search(this.formula);
-        } else if(typeof this.formula === 'object' && typeof this.formula.operator !== 'undefined') {
+        } else if (typeof this.formula === 'object' && typeof this.formula.operator !== 'undefined') {
             return this.collapse(this.formula);
         } else {
             console.error('Unkown type formula', this.formula);
@@ -588,4 +586,4 @@ var FormulaParser = (function() {
     };
 
     return FormulaParser;
-}) ();
+})();
