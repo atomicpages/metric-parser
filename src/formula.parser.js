@@ -1,8 +1,8 @@
 /************************************************************************************************************
  *
- * @ Version 2.0.6
+ * @ Version 2.0.7
  * @ FormulaParser
- * @ Date 11. 11. 2016
+ * @ Date 12. 02. 2016
  * @ Author PIGNOSE
  * @ Licensed under MIT.
  *
@@ -69,8 +69,8 @@ var FormulaParser = (function () {
 
         this.Parsers = [
             'Initializer',
-        	'LayerParser',
-        	'SyntaxParser',
+            'LayerParser',
+            'SyntaxParser',
             'FilterParser',
             'StringParser'
         ];
@@ -107,7 +107,7 @@ var FormulaParser = (function () {
      * This method retuns current version. (This isn't prototype function.)
      * @namespace FormulaParser
      * @method getVersion
-     * @return {Number}
+     * @returns {Number}
      */
     FormulaParser.getVersion = function () {
         return _PLUGIN_VERSION_;
@@ -117,12 +117,12 @@ var FormulaParser = (function () {
      * When item is in the array, This will returns true.
      * @namespace FormulaParser
      * @method inArray
-     * @param {Dynamic} i - item
-     * @param {Array} a - array
-     * @return {bool}
+     * @param {Any} item condition parameter
+     * @param {Array} array base target parameter
+     * @returns {bool}
      */
-    FormulaParser.prototype.inArray = function (i, a) {
-        for (var idx in a) if (a[idx] === i) return idx;
+    FormulaParser.prototype.inArray = function (item, array) {
+        for (var idx in array) if (array[idx] === item) return idx;
         return -1;
     };
 
@@ -130,11 +130,11 @@ var FormulaParser = (function () {
      * When item is operand type(number, object), This will returns true.
      * @namespace FormulaParser
      * @method isOperand
-     * @param {Dynamic} i - item
-     * @return {bool}
+     * @param {Dynamic} item
+     * @returns {bool} When parameter is operand type, This function will returuns true.
      */
-    FormulaParser.prototype.isOperand = function (i) {
-        return typeof i === 'object' || this.isNumeric(i);
+    FormulaParser.prototype.isOperand = function (item) {
+        return typeof item === 'object' || this.isNumeric(item);
     };
 
     /**
@@ -142,7 +142,7 @@ var FormulaParser = (function () {
      * @namespace FormulaParser
      * @method getOperatorPriority
      * @param {String} operator
-     * @return {Number}
+     * @returns {Number}
      */
     FormulaParser.prototype.getOperatorPriority = function (operator) {
         if (this.inArray(operator, this.Operators) === -1) {
@@ -164,7 +164,7 @@ var FormulaParser = (function () {
      * @namespace FormulaParser
      * @method isNumeric
      * @param {Number} n - number
-     * @return {bool}
+     * @returns {bool} When parameter is numeric this function returns true
      */
     FormulaParser.prototype.isNumeric = function (n) {
         return (/\d+(\.\d*)?|\.\d+/).test(n);
@@ -175,7 +175,7 @@ var FormulaParser = (function () {
      * @namespace FormulaParser
      * @method stringToArray
      * @param {String} s - formula string
-     * @return {array}
+     * @returns {array}
      */
     FormulaParser.prototype.stringToArray = function (s) {
         var data = [];
@@ -201,7 +201,7 @@ var FormulaParser = (function () {
      * @param {Number} code - return code
      * @param {Dynamic} data - return data
      * @param {Array} mapping - return message mapping data
-     * @return {array}
+     * @returns {array}
      */
     FormulaParser.prototype.log = function (code, data, mapping) {
         var message = this.Message[code], idx, item;
@@ -237,7 +237,7 @@ var FormulaParser = (function () {
      * @param {Array} data - formula array data
      * @param {Number} pos - formula stack cursor
      * @param {Number} depth - formula search depth (start from 0)
-     * @return {Object}
+     * @returns {Object}
      */
     FormulaParser.prototype.layerParser = function (data, pos, depth) {
         var innerDepth = 0;
@@ -317,7 +317,7 @@ var FormulaParser = (function () {
      * @param {Number} depth - formula search depth (start from 0)
      * @param {Number} length - compressed formula expression length
      * @param {Array} operators - permitted formula unit array
-     * @return {Object}
+     * @returns {Object}
      */
     FormulaParser.prototype.syntaxParser = function (data, pos, depth, length, operators) {
         this.currentParser = this.ParserMap.SyntaxParser;
@@ -399,7 +399,7 @@ var FormulaParser = (function () {
      * @method filterParser
      * @related search method
      * @param {Object} data - formula object
-     * @return {Object}
+     * @returns {Object}
      */
     FormulaParser.prototype.filterParser = function (data) {
         if (typeof data[0] === 'object') {
@@ -429,7 +429,7 @@ var FormulaParser = (function () {
      * @param {Object} data - formula object
      * @param {Number} depth - formula parse depth
      * @param {Number} pos - formula stack cursor
-     * @return {Array}
+     * @returns {Array}
      */
     FormulaParser.prototype.stringParser = function (data, depth, pos) {
         this.currentParser = this.ParserMap.StringParser;
@@ -503,7 +503,7 @@ var FormulaParser = (function () {
      * @param {Array} data - formula array data
      * @param {Number} pos - formula stack cursor
      * @param {Number} depth - formula search depth (start from 0)
-     * @return {Object}
+     * @returns {Object}
      */
     FormulaParser.prototype.search = function (data, pos, depth) {
         var _super = this;
@@ -557,7 +557,7 @@ var FormulaParser = (function () {
      * @related stringParser method.
      * @param {Object} data - formula object data
      * @param {Number} depth - formula search depth (start from 0)
-     * @return {Object}
+     * @returns {Object}
      */
     FormulaParser.prototype.collapse = function (data, depth) {
         var _this = this, formula = null;
@@ -575,7 +575,7 @@ var FormulaParser = (function () {
      * @namespace FormulaParser
      * @method init
      * @related FormulaParser object.
-     * @return {Dynamic}
+     * @returns {Dynamic}
      */
     FormulaParser.prototype.init = function () {
         if (typeof this.formula === 'undefined' || this.formula === null) {
