@@ -1,6 +1,6 @@
 {
   "name": "pg-formula-parser",
-  "version": "2.0.7",
+  "version": "2.0.10",
   "description": "Formula expression parser and validation library.",
   "main": "index.html",
   "scripts": {
