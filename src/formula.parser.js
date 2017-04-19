@@ -1,15 +1,5 @@
-/************************************************************************************************************
- *
- * @ Version 2.0.7
- * @ FormulaParser
- * @ Date 12. 02. 2016
- * @ Author PIGNOSE
- * @ Licensed under MIT.
- *
- ***********************************************************************************************************/
-
 var FormulaParser = (function () {
-    var _PLUGIN_VERSION_ = '2.0.6';
+    var _PLUGIN_VERSION_ = '2.0.10';
 
     function FormulaParser(formula) {
         var idx;
@@ -217,7 +207,7 @@ var FormulaParser = (function () {
             msg: message
         };
 
-        if (typeof data !== 'undefined') {
+        if (typeof data !== 'undefined' && data !== null) {
             for (idx in data) {
                 item = data[idx];
                 if (typeof item !== 'function') {
@@ -328,12 +318,12 @@ var FormulaParser = (function () {
 
         var cursor = pos;
 
-        if (typeof data[0] !== 'undefined' && typeof data[0][0] === 'object' && typeof data[0].operator === 'undefined') {
+        if (typeof data[0] !== 'undefined' && data[0] !== null && typeof data[0][0] === 'object' && (typeof data[0].operator === 'undefined' || data[0].operator === null)) {
             data[0] = data[0][0];
         }
 
         if (data.length < 3) {
-            if (data.length <= 1 && typeof data[0] === 'object' && typeof data[0].operator !== 'undefined') {
+            if (data.length <= 1 && typeof data[0] === 'object' && typeof data[0].operator !== 'undefined' && data[0].operator !== null) {
                 return data[0];
             } else {
                 return this.log(0x01, {
@@ -440,20 +430,20 @@ var FormulaParser = (function () {
         depth = depth || 0;
         pos = pos || 0;
 
-        if (typeof data.value === 'undefined') {
-            if (typeof data.operator === 'undefined') {
+        if (typeof data.value === 'undefined' || data.value === null) {
+            if (typeof data.operator === 'undefined' || data.operator === null) {
                 return this.log(0x20, {
                     stack: this.currentParser,
                     col: pos,
                     depth: depth
                 });
-            } else if (typeof data.operand1 === 'undefined') {
+            } else if (typeof data.operand1 === 'undefined' || data.operand1 === null) {
                 return this.log(0x21, {
                     stack: this.currentParser,
                     col: pos,
                     depth: depth
                 });
-            } else if (typeof data.operand2 === 'undefined') {
+            } else if (typeof data.operand2 === 'undefined' || data.operand2 === null) {
                 return this.log(0x22, {
                     stack: this.currentParser,
                     col: pos,
@@ -476,7 +466,7 @@ var FormulaParser = (function () {
                     return result;
                 } else {
                     formula = formula.concat(result.data);
-                    if (typeof data.operator !== 'undefined' && typeof result.operator !== 'undefined') {
+                    if (typeof data.operator !== 'undefined' && data.operator !== null && typeof result.operator !== 'undefined' && result.operator !== null) {
                         if (this.getOperatorPriority(data.operator) < this.getOperatorPriority(result.operator) && this.getOperatorPriority(data.operator) !== -1) {
                             formula.splice([formula.length - 3], 0, '(');
                             formula.splice([formula.length], 0, ')');
@@ -583,9 +573,9 @@ var FormulaParser = (function () {
                 stack: this.Parsers.Initializer,
                 col: 0
             });
-        } else if (typeof this.formula === 'string' || (typeof this.formula === 'object' && typeof this.formula.operator === 'undefined')) {
+        } else if (typeof this.formula === 'string' || (typeof this.formula === 'object' && (typeof this.formula.operator === 'undefined' || this.formula.operator === null))) {
             return this.search(this.formula);
-        } else if (typeof this.formula === 'object' && typeof this.formula.operator !== 'undefined') {
+        } else if (typeof this.formula === 'object' && typeof this.formula.operator !== 'undefined' && this.formula.operator !== null) {
             return this.collapse(this.formula);
         } else {
             console.error('Unkown type formula', this.formula);
