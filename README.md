@@ -22,7 +22,7 @@ And the plugin be made by vanila js (pure javascript).
 
 [See demo](http://www.pigno.se/barn/PIGNOSE-FormulaParser/)
 
-![Screen Shot](http://www.nhpcw.com/upload/2016-11-10%2B16%253B33%253B23_0_111016043349.png)
+![Screen Shot](http://www.pigno.se/barn/PIGNOSE-FormulaParser/demo/img/screenshot_main.png)
 
 ----
 
