@@ -1,24 +1,28 @@
 {
-  "name": "pg-formula-parser",
-  "description": "Formula expression parser and validation library.",
-  "main": "index.html",
+  "name": "metric-parser",
+  "description": "AST-based advanced mathematical parser written by Typescript.",
+  "main": "dist/metric.parser.umd.js",
   "authors": [
     "PIGNOSE"
   ],
   "license": "MIT",
   "keywords": [
-    "Formula",
-    "Parser",
-    "VanilaJS",
-    "FormulaBuilder",
-    "Validator"
+      "formula",
+      "metric",
+      "parser",
+      "ast",
+      "typescript",
+      "validator"
   ],
-  "homepage": "https://github.com/KennethanCeyer/FormulaParser",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ]
+  "homepage": "https://github.com/KennethanCeyer/metric-parser",
+  "install": {
+      "path": "dist",
+      "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests"
+      ]
+
 }
