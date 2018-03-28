@@ -161,7 +161,7 @@ const result = convert('1 + (2 + 3)');
 const tree: Tree = result.data;
 ```
 
-```json
+```javascript
 {
   operator: '+',
   operand1: { value: { type: 'unit', unit: 1 } },
