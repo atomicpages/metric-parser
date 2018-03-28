@@ -40,13 +40,19 @@ git clone git@github.com:KennethanCeyer/metric-parser.git
 #### bower
 
 ```bash
-bower install metric-parser
+$ bower install metric-parser
 ```
 
 #### npm
 
 ```bash
-npm install metric-parser
+$ npm install metric-parser
+```
+
+#### yarn
+
+```bash
+$ yarn add metric-parser
 ```
 
 ----
