@@ -61,7 +61,7 @@ npm install metric-parser
 // { data: {tree object}, code: 0 }
 const result = metricParser.convert('1 + (2 + 3)');
 
-// [ 1, '+', 2, '+', 3 ] <= bracket will be optimized
+// { data: [ 1, '+', 2, '+', 3 ], code: 0 } <= bracket will be optimized
 const expression = metricParser.convert(result.data);
 
 // true | false <= true means valid
@@ -76,7 +76,7 @@ import { convert, valid } from 'metric-parser';
 // { data: {tree object}, code: 0 }
 const result: ParserGeneralResult = convert('1 + (2 + 3)');
 
-// [ 1, '+', 2, '+', 3 ] <= bracket will be optimized
+// { data: [ 1, '+', 2, '+', 3 ], code: 0 } <= bracket will be optimized
 const expression: string[] = convert(result.data);
 
 // true | false <= true means valid
@@ -91,7 +91,7 @@ const parser = require('metric-parser');
 // { data: {tree object}, code: 0 }
 const result = parser.convert('1 + (2 + 3)');
 
-// [ 1, '+', 2, '+', 3 ] <= bracket will be optimized
+// { data: [ 1, '+', 2, '+', 3 ], code: 0 } <= bracket will be optimized
 const expression = parser.convert(result.data);
 
 // true | false <= true means valid
