@@ -34,7 +34,7 @@
 #### git
 
 ```bash
-git clone git@github.com:KennethanCeyer/metric-parser.git
+$ git clone git@github.com:KennethanCeyer/metric-parser.git
 ```
 
 #### bower
