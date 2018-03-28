@@ -58,63 +58,29 @@ npm install metric-parser
 ```html
 <script src="~/dist/metric.parser.umd.js"></script>
 <script>
-const tree = metricParser.convert('1 + (2 + 3)');
-const treeToExpression = metricParser.convert(tree.data);
-const valid = metricParser.valid(tree.data);
+// { data: {tree object}, code: 0 }
+const result = metricParser.convert('1 + (2 + 3)');
 
-const ast = metricParser.convert('1 + (2 + 3)', true);
+// [ 1, '+', 2, '+', 3 ] <= bracket will be optimized
+const expression = metricParser.convert(result.data);
 
-// create new node
-const newAst = new metricParser.AbstractSyntaxTree('+');
-
-// attach ast to child
-newAst.leftNode = ast;
-
-// attach new node to right child
-netAst.rightNode = new metricParser.AbstractSyntaxTree(3);
-
-const expression = netAst.expression;
-const childExpression = newAst.leftNode.rightNode;
-
-const treeBuilder = new metricParser.TreeBuilder();
-
-// convert to tree
-const astToTree = treeBuilder.makeTree(ast);
-
-// convert to AST
-const treeToAst = treeBuilder.makeAst(tree);
+// true | false <= true means valid
+const valid = metricParser.valid(result.data);
 </script>
 ```
 
 #### Typescript
 ```typescript
-import { convert, valid, AbstractSyntaxTree, TreeBuilder, Tree } from 'metric-parser';
+import { convert, valid } from 'metric-parser';
 
-const tree = convert('1 + (2 + 3)');
-const treeToExpression = convert(tree.data);
-const valid = valid(tree.data);
+// { data: {tree object}, code: 0 }
+const result: ParserGeneralResult = convert('1 + (2 + 3)');
 
-const ast: AbstractSyntaxTree = convert('1 + (2 + 3)', true);
+// [ 1, '+', 2, '+', 3 ] <= bracket will be optimized
+const expression: string[] = convert(result.data);
 
-// create new node
-const newAst = new AbstractSyntaxTree('+');
-
-// attach ast to child
-newAst.leftNode = ast;
-
-// attach new node to right child
-netAst.rightNode = new AbstractSyntaxTree(3);
-
-const expression = netAst.expression;
-const childExpression = newAst.leftNode.rightNode;
-
-const treeBuilder = new TreeBuilder();
-
-// convert to tree
-const astToTree: Tree = treeBuilder.makeTree(ast);
-
-// convert to AST
-const treeToAst: AbstractSyntaxTree = treeBuilder.makeAst(tree);
+// true | false <= true means valid
+const valid: boolean = valid(result.data);
 ```
 
 #### NodeJS
@@ -122,31 +88,14 @@ const treeToAst: AbstractSyntaxTree = treeBuilder.makeAst(tree);
 ```javascript
 const parser = require('metric-parser');
 
-const tree = parser.convert('1 + (2 + 3)');
-const treeToExpression = parser.convert(tree.data);
-const valid = parser.valid(tree.data);
+// { data: {tree object}, code: 0 }
+const result = parser.convert('1 + (2 + 3)');
 
-const ast = parser.convert('1 + (2 + 3)', true);
+// [ 1, '+', 2, '+', 3 ] <= bracket will be optimized
+const expression = parser.convert(result.data);
 
-// create new node
-const newAst = new parser.AbstractSyntaxTree('+');
-
-// attach ast to child
-newAst.leftNode = ast;
-
-// attach new node to right child
-netAst.rightNode = new parser.AbstractSyntaxTree(3);
-
-const expression = netAst.expression;
-const childExpression = newAst.leftNode.rightNode;
-
-const treeBuilder = new parser.TreeBuilder();
-
-// convert to tree
-const astToTree = treeBuilder.makeTree(ast);
-
-// convert to AST
-const treeToAst = treeBuilder.makeAst(tree);
+// true | false <= true means valid
+const valid = parser.valid(result.data);
 ```
 
 ----
