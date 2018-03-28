@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { convert, ConvertData, getVersion } from './metric.parser';
+import { convert, ConvertData, getVersion } from './tool';
 import { Tree } from './tree/simple.tree/type';
 import { success } from './error';
 

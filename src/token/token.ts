@@ -1,5 +1,3 @@
-import Literal = Token.literal;
-
 export namespace Token {
     export type Token = string | number | any;
     export type Addition = '+';
@@ -39,7 +37,7 @@ export namespace Token {
         BracketOpen: '(',
         BracketClose: ')',
         Dot: '.'
-    }
+    };
 
     export const addition = [literal.Addition];
     export const subtraction = [literal.Subtraction];
@@ -48,8 +46,8 @@ export namespace Token {
     export const mod = [literal.Mod];
     export const pow = [literal.Pow];
     export const bracketOpen = literal.BracketOpen;
-    export const bracketClose = literal.BracketClose
-    export const bracket = [ Token.bracketOpen, Token.bracketClose];
+    export const bracketClose = literal.BracketClose;
+    export const bracket = [Token.bracketOpen, Token.bracketClose];
     export const precedence = [
         ...Token.addition,
         ...Token.subtraction,

@@ -510,7 +510,6 @@ var TokenValidateLevel;
     TokenValidateLevel[TokenValidateLevel["Escape"] = 1] = "Escape";
     TokenValidateLevel[TokenValidateLevel["Fatal"] = 2] = "Fatal";
 })(TokenValidateLevel || (TokenValidateLevel = {}));
-
 var TokenValidator = /** @class */ (function () {
     function TokenValidator() {
     }
@@ -928,13 +927,13 @@ var Builder = /** @class */ (function (_super) {
     return Builder;
 }(BuilderMessage));
 
-var _PLUGIN_VERSION_ = '0.0.2';
+var _MODULE_VERSION_ = '0.0.3';
 function convert(formula) {
     var builder = new Builder(formula);
     return builder.build();
 }
 function getVersion() {
-    return _PLUGIN_VERSION_;
+    return _MODULE_VERSION_;
 }
 
-export { convert, getVersion };
+export { convert, getVersion, Builder, AbstractSyntaxTree, TokenAnalyzer, TreeBuilder, success, ParserError, BuilderError, TokenError, TreeError };

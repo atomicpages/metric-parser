@@ -1,8 +1,13 @@
 import { Token } from './token';
-import { TokenValidateLevel } from '../token.validate.type';
 import { TokenHelper } from './token.helper';
 import { ParserError } from '../error';
 import { TokenError } from './token.error';
+
+export enum TokenValidateLevel {
+    Pass,
+    Escape,
+    Fatal
+}
 
 export class TokenValidator {
     public static validateToken(token: Token.Token): ParserError | undefined {

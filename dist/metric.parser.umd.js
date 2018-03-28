@@ -259,7 +259,6 @@
     }(Error));
 
     /* tslint:disable:max-line-length */
-    var TokenError;
     (function (TokenError) {
         TokenError.id = 0x0100;
         TokenError.invalidToken = { code: 0x0100, text: '`{0}` token is invalid token type' };
@@ -269,7 +268,7 @@
         TokenError.missingOpenBracket = { code: 0x0120, text: 'missing open bracket, you cannot close the bracket' };
         TokenError.missingCloseBracket = { code: 0x0121, text: 'missing close bracket, the bracket must be closed' };
         TokenError.emptyToken = { code: 0x0150, text: 'token is empty' };
-    })(TokenError || (TokenError = {}));
+    })(exports.TokenError || (exports.TokenError = {}));
     /* tslint:enable:max-line-length */
 
     var AbstractSyntaxTreeBase = /** @class */ (function () {
@@ -378,7 +377,7 @@
         AbstractSyntaxTreeBase.prototype.removeClosestBracket = function () {
             var node = this.findOpenedBracket();
             if (!node)
-                throw new ParserError(TokenError.missingOpenBracket);
+                throw new ParserError(exports.TokenError.missingOpenBracket);
             var targetNode = node.leftNode;
             targetNode.subType = Token.SubType.Group;
             if (!node.parent) {
@@ -516,22 +515,21 @@
         TokenValidateLevel[TokenValidateLevel["Escape"] = 1] = "Escape";
         TokenValidateLevel[TokenValidateLevel["Fatal"] = 2] = "Fatal";
     })(TokenValidateLevel || (TokenValidateLevel = {}));
-
     var TokenValidator = /** @class */ (function () {
         function TokenValidator() {
         }
         TokenValidator.validateToken = function (token) {
             var level = TokenValidator.extractTokenLevel(token);
             if (level === TokenValidateLevel.Fatal)
-                return new ParserError(TokenError.invalidToken, token);
+                return new ParserError(exports.TokenError.invalidToken, token);
         };
         TokenValidator.validateValueToken = function (token, prevToken) {
             if (!prevToken)
                 return undefined;
             if (TokenHelper.isValue(prevToken))
-                return new ParserError(TokenError.missingOperator, prevToken);
+                return new ParserError(exports.TokenError.missingOperator, prevToken);
             if (!TokenHelper.isBracketOpen(prevToken) && !TokenHelper.isOperator(prevToken))
-                return new ParserError(TokenError.missingOperator, prevToken);
+                return new ParserError(exports.TokenError.missingOperator, prevToken);
         };
         TokenValidator.extractTokenLevel = function (token) {
             var levelExtractors = [
@@ -646,7 +644,7 @@
             if (this.isTokenArrayNumeric(tokens))
                 return tokens.join('');
             if (tokens.length > 1)
-                throw new ParserError(TokenError.invalidNonNumericValue, this.makeTokenString(tokens));
+                throw new ParserError(exports.TokenError.invalidNonNumericValue, this.makeTokenString(tokens));
             return tokens[0];
         };
         TokenEnumerable.prototype.makeTokenString = function (tokens) {
@@ -656,13 +654,12 @@
     }());
 
     /* tslint:disable:max-line-length */
-    var TreeError;
     (function (TreeError) {
         TreeError.id = 0x0200;
         TreeError.emptyAst = { code: 0x0200, text: 'AST is empty' };
         TreeError.emptyTree = { code: 0x0201, text: 'tree is empty' };
         TreeError.invalidParserTree = { code: 0x0220, text: 'invalid parser tree' };
-    })(TreeError || (TreeError = {}));
+    })(exports.TreeError || (exports.TreeError = {}));
     /* tslint:enable:max-line-length */
 
     var GeneralError;
@@ -691,15 +688,15 @@
         }
         TreeBuilder.prototype.makeTree = function (ast) {
             if (!ast)
-                throw new ParserError(TreeError.emptyAst);
+                throw new ParserError(exports.TreeError.emptyAst);
             var tree = this.makeNode(ast);
             if (!TreeBuilder.isValid(tree))
-                throw new ParserError(TreeError.invalidParserTree);
+                throw new ParserError(exports.TreeError.invalidParserTree);
             return tree;
         };
         TreeBuilder.prototype.makeAst = function (tree) {
             if (!tree)
-                throw new ParserError(TreeError.emptyTree);
+                throw new ParserError(exports.TreeError.emptyTree);
             return this.makeAstNode(tree);
         };
         TreeBuilder.prototype.makeNode = function (node) {
@@ -748,7 +745,7 @@
         };
         TreeBuilder.getValue = function (operand) {
             if (!TreeBuilder.isValidOperand(operand))
-                throw new ParserError(TreeError.invalidParserTree);
+                throw new ParserError(exports.TreeError.invalidParserTree);
             return operand.value.type === 'item'
                 ? operand.value.item
                 : operand.value.unit;
@@ -805,11 +802,11 @@
         };
         TokenAnalyzer.prototype.preValidate = function () {
             if (!this.token || !this.token.length)
-                throw new ParserError(TokenError.emptyToken);
+                throw new ParserError(exports.TokenError.emptyToken);
         };
         TokenAnalyzer.prototype.postValidate = function () {
             if (this.ast.hasOpenBracket())
-                throw new ParserError(TokenError.missingCloseBracket);
+                throw new ParserError(exports.TokenError.missingCloseBracket);
         };
         TokenAnalyzer.prototype.handleError = function (error) {
             if (error instanceof ParserError)
@@ -853,12 +850,12 @@
         TokenAnalyzer.prototype.analyzeOperatorToken = function (token) {
             var lastToken = this.popStack();
             if (TokenHelper.isOperator(lastToken))
-                throw new ParserError(TokenError.invalidTwoOperator, lastToken, token);
+                throw new ParserError(exports.TokenError.invalidTwoOperator, lastToken, token);
             if (!this.currentTree.value)
                 this.currentTree.value = token;
             else {
                 if (!TokenHelper.isBracket(this.currentTree.value) && !this.currentTree.rightNode)
-                    throw new ParserError(TokenError.invalidTwoOperator, lastToken, token);
+                    throw new ParserError(exports.TokenError.invalidTwoOperator, lastToken, token);
                 this.currentTree = this.currentTree.insertNode(token);
                 this.ast = this.ast.findRoot();
             }
@@ -888,11 +885,10 @@
     }());
 
     /* tslint:disable:max-line-length */
-    var BuilderError;
     (function (BuilderError) {
         BuilderError.id = 0x0300;
         BuilderError.emptyData = { code: 0x0300, text: 'data is empty' };
-    })(BuilderError || (BuilderError = {}));
+    })(exports.BuilderError || (exports.BuilderError = {}));
     /* tslint:enable:max-line-length */
 
     var Builder = /** @class */ (function (_super) {
@@ -922,7 +918,7 @@
         };
         Builder.prototype.tryBuild = function () {
             if (!this.data)
-                throw new ParserError(BuilderError.emptyData);
+                throw new ParserError(exports.BuilderError.emptyData);
             if (BuilderHelper.needParse(this.data))
                 return this.parse(this.data);
             if (BuilderHelper.needUnparse(this.data))
@@ -934,17 +930,23 @@
         return Builder;
     }(BuilderMessage));
 
-    var _PLUGIN_VERSION_ = '0.0.2';
+    var _MODULE_VERSION_ = '0.0.3';
     function convert(formula) {
         var builder = new Builder(formula);
         return builder.build();
     }
     function getVersion() {
-        return _PLUGIN_VERSION_;
+        return _MODULE_VERSION_;
     }
 
     exports.convert = convert;
     exports.getVersion = getVersion;
+    exports.Builder = Builder;
+    exports.AbstractSyntaxTree = AbstractSyntaxTree;
+    exports.TokenAnalyzer = TokenAnalyzer;
+    exports.TreeBuilder = TreeBuilder;
+    exports.success = success;
+    exports.ParserError = ParserError;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
