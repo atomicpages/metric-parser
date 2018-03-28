@@ -1055,261 +1055,88 @@ img { max-width: 100%; }
 			<h4 id="javascript-web-">Javascript (Web)</h4>
 			<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"~/dist/metric.parser.umd.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="actionscript">
-<span class="hljs-comment">/**
- * tree =&gt;
- * {
- *   code: 0, // success
- *   data: {
- *     operator: '+',
- *     operand1: { value: { type: 'unit', unit: 1 } },
- *     operand2: {
- *       operator: '+',
- *       operand1: { value: { type: 'unit', unit: 2 } },
- *       operand1: { value: { type: 'unit', unit: 3 } }
- *     }
- *   }
- * }
- */</span>
-<span class="hljs-keyword">const</span> tree = metricParser.convert(<span class="hljs-string">'1 + (2 + 3)'</span>);
+<span class="hljs-comment">// { data: {tree object}, code: 0 }</span>
+<span class="hljs-keyword">const</span> result = metricParser.convert(<span class="hljs-string">'1 + (2 + 3)'</span>);
 
-<span class="hljs-comment">/**
- * ast =&gt;
- * {
- *   code: 0, // success
- *   data: {
- *     AbstractSyntaxTree {
- *       type: 1, // operator
- *       value: '+',
- *       leftNode: AbstractSyntaxTree {
- *         type: 2, // value
- *         value: 1
- *       },
- *       rightNode: AbstractSyntaxTree {
- *         type: 1, // operator
- *         value: '+',
- *         leftNode: AbstractSyntaxTree {
- *           type: 1, // value
- *           value: 2
- *         },
- *         rightNode: AbstractSyntaxTree {
- *           type: 1, // value,
- *           value: 3
- *         }
- *       }
- *     }
- *   }
- */</span>
-<span class="hljs-keyword">const</span> ast = metricParser.convert(<span class="hljs-string">'1 + (2 + 3)'</span>, <span class="hljs-literal">true</span>);
+<span class="hljs-comment">// { data: [ 1, '+', 2, '+', 3 ], code: 0 } &lt;= bracket will be optimized</span>
+<span class="hljs-keyword">const</span> expression = metricParser.convert(result.data);
 
-<span class="hljs-comment">/**
- * treeToExpression =&gt;
- * [ 1, '+', '2', '+', '3' ] // optimized bracket
- */</span>
-<span class="hljs-keyword">const</span> treeToExpression = metricParser.convert(tree.data);
-
-<span class="hljs-comment">/**
- * valid =&gt; true
- */</span>
-<span class="hljs-keyword">const</span> valid = metricParser.valid(tree.data);
-
-<span class="hljs-comment">// create new node</span>
-<span class="hljs-keyword">const</span> newAst = <span class="hljs-keyword">new</span> metricParser.AbstractSyntaxTree(<span class="hljs-string">'+'</span>);
-
-<span class="hljs-comment">// attach ast to child</span>
-newAst.leftNode = ast;
-
-<span class="hljs-comment">// attach new node to right child</span>
-netAst.rightNode = <span class="hljs-keyword">new</span> metricParser.AbstractSyntaxTree(<span class="hljs-number">3</span>);
-
-<span class="hljs-comment">/**
- * expression =&gt; [ 1, '+', 2, '+', 3, '+', 3 ]
- */</span>
-<span class="hljs-keyword">const</span> expression = netAst.expression;
-
-<span class="hljs-comment">/**
- * childExpression = [ 2, '+', 3 ]
- */</span>
-<span class="hljs-keyword">const</span> childExpression = newAst.leftNode.rightNode;
-
-<span class="hljs-comment">// convert to tree</span>
-<span class="hljs-keyword">const</span> treeBuilder = <span class="hljs-keyword">new</span> metricParser.TreeBuilder();
-<span class="hljs-keyword">const</span> astToTree = treeBuilder.makeTree(ast);
-
-<span class="hljs-comment">// convert to ast</span>
-<span class="hljs-keyword">const</span> treeToAst = treeBuilder.makeAst(tree);
+<span class="hljs-comment">// true | false &lt;= true means valid</span>
+<span class="hljs-keyword">const</span> valid = metricParser.valid(result.data);
 </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 </code></pre>
 			<h4 id="typescript">Typescript</h4>
-			<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { convert, valid, AbstractSyntaxTree, TreeBuilder } <span class="hljs-keyword">from</span> <span class="hljs-string">'metric-parser'</span>;
+			<pre><code class="lang-typescript"><span class="hljs-keyword">import</span> { convert, valid } <span class="hljs-keyword">from</span> <span class="hljs-string">'metric-parser'</span>;
 
-<span class="hljs-comment">/**
- * tree =&gt;
- * {
- *   code: 0, // success
- *   data: {
- *     operator: '+',
- *     operand1: { value: { type: 'unit', unit: 1 } },
- *     operand2: {
- *       operator: '+',
- *       operand1: { value: { type: 'unit', unit: 2 } },
- *       operand1: { value: { type: 'unit', unit: 3 } }
- *     }
- *   }
- * }
- */</span>
-<span class="hljs-keyword">const</span> tree = convert(<span class="hljs-string">'1 + (2 + 3)'</span>);
+<span class="hljs-comment">// { data: {tree object}, code: 0 }</span>
+<span class="hljs-keyword">const</span> result: ParserGeneralResult = convert(<span class="hljs-string">'1 + (2 + 3)'</span>);
 
-<span class="hljs-comment">/**
- * ast =&gt;
- * {
- *   code: 0, // success
- *   data: {
- *     AbstractSyntaxTree {
- *       type: 1, // operator
- *       value: '+',
- *       leftNode: AbstractSyntaxTree {
- *         type: 2, // value
- *         value: 1
- *       },
- *       rightNode: AbstractSyntaxTree {
- *         type: 1, // operator
- *         value: '+',
- *         leftNode: AbstractSyntaxTree {
- *           type: 1, // value
- *           value: 2
- *         },
- *         rightNode: AbstractSyntaxTree {
- *           type: 1, // value,
- *           value: 3
- *         }
- *       }
- *     }
- *   }
- */</span>
-<span class="hljs-keyword">const</span> ast = convert(<span class="hljs-string">'1 + (2 + 3)'</span>, <span class="hljs-literal">true</span>);
+<span class="hljs-comment">// { data: [ 1, '+', 2, '+', 3 ], code: 0 } &lt;= bracket will be optimized</span>
+<span class="hljs-keyword">const</span> expression: <span class="hljs-built_in">string</span>[] = convert(result.data);
 
-<span class="hljs-comment">/**
- * treeToExpression =&gt;
- * [ 1, '+', '2', '+', '3' ] // optimized bracket
- */</span>
-<span class="hljs-keyword">const</span> treeToExpression = convert(tree.data);
-
-<span class="hljs-comment">/**
- * valid =&gt; true
- */</span>
-<span class="hljs-keyword">const</span> valid = valid(tree.data);
-
-<span class="hljs-comment">// create new node</span>
-<span class="hljs-keyword">const</span> newAst = <span class="hljs-keyword">new</span> AbstractSyntaxTree(<span class="hljs-string">'+'</span>);
-
-<span class="hljs-comment">// attach ast to child</span>
-newAst.leftNode = ast;
-
-<span class="hljs-comment">// attach new node to right child</span>
-netAst.rightNode = <span class="hljs-keyword">new</span> AbstractSyntaxTree(<span class="hljs-number">3</span>);
-
-<span class="hljs-comment">/**
- * expression =&gt; [ 1, '+', 2, '+', 3, '+', 3 ]
- */</span>
-<span class="hljs-keyword">const</span> expression = netAst.expression;
-
-<span class="hljs-comment">/**
- * childExpression = [ 2, '+', 3 ]
- */</span>
-<span class="hljs-keyword">const</span> childExpression = newAst.leftNode.rightNode;
-
-<span class="hljs-comment">// convert to tree</span>
-<span class="hljs-keyword">const</span> treeBuilder = <span class="hljs-keyword">new</span> TreeBuilder();
-<span class="hljs-keyword">const</span> astToTree = treeBuilder.makeTree(ast);
-
-<span class="hljs-comment">// convert to ast</span>
-<span class="hljs-keyword">const</span> treeToAst = treeBuilder.makeAst(tree);
+<span class="hljs-comment">// true | false &lt;= true means valid</span>
+<span class="hljs-keyword">const</span> valid: <span class="hljs-built_in">boolean</span> = valid(result.data);
 </code></pre>
 			<h4 id="nodejs">NodeJS</h4>
 			<pre><code class="lang-javascript"><span class="hljs-keyword">const</span> parser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'metric-parser'</span>);
 
-<span class="hljs-comment">/**
- * tree =&gt;
- * {
- *   code: 0, // success
- *   data: {
- *     operator: '+',
- *     operand1: { value: { type: 'unit', unit: 1 } },
- *     operand2: {
- *       operator: '+',
- *       operand1: { value: { type: 'unit', unit: 2 } },
- *       operand1: { value: { type: 'unit', unit: 3 } }
- *     }
- *   }
- * }
- */</span>
-<span class="hljs-keyword">const</span> tree = parser.convert(<span class="hljs-string">'1 + (2 + 3)'</span>);
+<span class="hljs-comment">// { data: {tree object}, code: 0 }</span>
+<span class="hljs-keyword">const</span> result = parser.convert(<span class="hljs-string">'1 + (2 + 3)'</span>);
 
-<span class="hljs-comment">/**
- * ast =&gt;
- * {
- *   code: 0, // success
- *   data: {
- *     AbstractSyntaxTree {
- *       type: 1, // operator
- *       value: '+',
- *       leftNode: AbstractSyntaxTree {
- *         type: 2, // value
- *         value: 1
- *       },
- *       rightNode: AbstractSyntaxTree {
- *         type: 1, // operator
- *         value: '+',
- *         leftNode: AbstractSyntaxTree {
- *           type: 1, // value
- *           value: 2
- *         },
- *         rightNode: AbstractSyntaxTree {
- *           type: 1, // value,
- *           value: 3
- *         }
- *       }
- *     }
- *   }
- */</span>
-<span class="hljs-keyword">const</span> ast = parser.convert(<span class="hljs-string">'1 + (2 + 3)'</span>, <span class="hljs-literal">true</span>);
+<span class="hljs-comment">// { data: [ 1, '+', 2, '+', 3 ], code: 0 } &lt;= bracket will be optimized</span>
+<span class="hljs-keyword">const</span> expression = parser.convert(result.data);
 
-<span class="hljs-comment">/**
- * treeToExpression =&gt;
- * [ 1, '+', '2', '+', '3' ] // optimized bracket
- */</span>
-<span class="hljs-keyword">const</span> treeToExpression = parser.convert(tree.data);
+<span class="hljs-comment">// true | false &lt;= true means valid</span>
+<span class="hljs-keyword">const</span> valid = parser.valid(result.data);
+</code></pre>
+			<hr>
+			<h3 id="datatype">DataType</h3>
+			<h4 id="tree">Tree</h4>
+			<blockquote>
+				<p>Tree is a simple object that converted from AST. </p>
+			</blockquote>
+			<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> result = convert(<span class="hljs-string">'1 + (2 + 3)'</span>);
+<span class="hljs-keyword">const</span> tree: Tree = result.data;
+</code></pre>
+			<pre><code class="lang-javascript">{
+  <span class="hljs-attr">operator</span>: <span class="hljs-string">'+'</span>,
+  <span class="hljs-attr">operand1</span>: { <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">'unit'</span>, <span class="hljs-attr">unit</span>: <span class="hljs-number">1</span> } },
+  <span class="hljs-attr">operand2</span>: {
+    <span class="hljs-attr">operator</span>: <span class="hljs-string">'+'</span>,
+    <span class="hljs-attr">operand1</span>: { <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">'unit'</span>, <span class="hljs-attr">unit</span>: <span class="hljs-number">2</span> } },
+    <span class="hljs-attr">operand1</span>: { <span class="hljs-attr">value</span>: { <span class="hljs-attr">type</span>: <span class="hljs-string">'unit'</span>, <span class="hljs-attr">unit</span>: <span class="hljs-number">3</span> } }
+  }
+}
+</code></pre>
+			<h4 id="ast-abstractsyntaxtree-">AST (AbstractSyntaxTree)</h4>
+			<blockquote>
+				<p>AST is the most important object that contains the structure of a formula.</p>
+			</blockquote>
+			<pre><code class="lang-typescript"><span class="hljs-keyword">const</span> ast = convert(<span class="hljs-string">'1 + (2 + 3)'</span>, <span class="hljs-literal">true</span>);
 
-<span class="hljs-comment">/**
- * valid =&gt; true
- */</span>
-<span class="hljs-keyword">const</span> valid = parser.valid(tree.data);
-
-<span class="hljs-comment">// create new node</span>
-<span class="hljs-keyword">const</span> newAst = <span class="hljs-keyword">new</span> parser.AbstractSyntaxTree(<span class="hljs-string">'+'</span>);
-
-<span class="hljs-comment">// attach ast to child</span>
-newAst.leftNode = ast;
-
-<span class="hljs-comment">// attach new node to right child</span>
-netAst.rightNode = <span class="hljs-keyword">new</span> parser.AbstractSyntaxTree(<span class="hljs-number">3</span>);
-
-<span class="hljs-comment">/**
- * expression =&gt; [ 1, '+', 2, '+', 3, '+', 3 ]
- */</span>
-<span class="hljs-keyword">const</span> expression = netAst.expression;
-
-<span class="hljs-comment">/**
- * childExpression = [ 2, '+', 3 ]
- */</span>
-<span class="hljs-keyword">const</span> childExpression = newAst.leftNode.rightNode;
-
-<span class="hljs-comment">// convert to tree</span>
-<span class="hljs-keyword">const</span> treeBuilder = <span class="hljs-keyword">new</span> parser.TreeBuilder();
-<span class="hljs-keyword">const</span> astToTree = treeBuilder.makeTree(ast);
-
-<span class="hljs-comment">// convert to ast</span>
-<span class="hljs-keyword">const</span> treeToAst = treeBuilder.makeAst(tree);
+</code></pre>
+			<pre><code class="lang-typescript">{
+  AbstractSyntaxTree {
+    <span class="hljs-keyword">type</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// operator</span>
+    value: <span class="hljs-string">'+'</span>,
+    leftNode: AbstractSyntaxTree {
+      <span class="hljs-keyword">type</span>: <span class="hljs-number">2</span>, <span class="hljs-comment">// value</span>
+      value: <span class="hljs-number">1</span>
+    },
+    rightNode: AbstractSyntaxTree {
+      <span class="hljs-keyword">type</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// operator</span>
+      value: <span class="hljs-string">'+'</span>,
+      leftNode: AbstractSyntaxTree {
+        <span class="hljs-keyword">type</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// value</span>
+        value: <span class="hljs-number">2</span>
+      },
+      rightNode: AbstractSyntaxTree {
+        <span class="hljs-keyword">type</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// value,</span>
+        value: <span class="hljs-number">3</span>
+      }
+    }
+  }
+}
 </code></pre>
 			<hr>
 			<h3 id="roadmap">Roadmap</h3>
@@ -1506,7 +1333,7 @@ netAst.rightNode = <span class="hljs-keyword">new</span> parser.AbstractSyntaxTr
 			<section class="tsd-panel tsd-member tsd-kind-variable tsd-is-not-exported">
 				<a name="_module_version_" class="tsd-anchor"></a>
 				<h3><span class="tsd-flag ts-flagConst">Const</span> _MODULE_<wbr>VERSION_</h3>
-				<div class="tsd-signature tsd-kind-icon">_MODULE_<wbr>VERSION_<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"0.0.3"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;0.0.3&quot;</span></div>
+				<div class="tsd-signature tsd-kind-icon">_MODULE_<wbr>VERSION_<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"0.0.4"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;0.0.4&quot;</span></div>
 				<aside class="tsd-sources">
 					<ul>
 						<li>Defined in tool.ts:5</li>

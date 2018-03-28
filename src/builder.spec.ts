@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { Builder } from './builder';
 import { BuilderError } from './builder.error';
-import { ParserError } from './error';
 
 describe('test method: Builder.build()', () => {
     it('should throws an error result with undefined data', () => {

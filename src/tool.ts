@@ -2,7 +2,7 @@ import { ParserGeneralResult } from './parser/parser.result';
 import { Builder } from './builder';
 import { Tree } from './tree/simple.tree/type';
 
-const _MODULE_VERSION_ = '0.0.3';
+const _MODULE_VERSION_ = '0.0.4';
 
 export type ConvertData = ParseData | UnparseData;
 

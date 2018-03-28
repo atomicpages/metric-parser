@@ -930,7 +930,7 @@
         return Builder;
     }(BuilderMessage));
 
-    var _MODULE_VERSION_ = '0.0.3';
+    var _MODULE_VERSION_ = '0.0.4';
     function convert(formula) {
         var builder = new Builder(formula);
         return builder.build();
