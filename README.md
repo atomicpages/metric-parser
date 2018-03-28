@@ -58,62 +58,11 @@ npm install metric-parser
 ```html
 <script src="~/dist/metric.parser.umd.js"></script>
 <script>
-/**
- * tree =>
- * {
- *   code: 0, // success
- *   data: {
- *     operator: '+',
- *     operand1: { value: { type: 'unit', unit: 1 } },
- *     operand2: {
- *       operator: '+',
- *       operand1: { value: { type: 'unit', unit: 2 } },
- *       operand1: { value: { type: 'unit', unit: 3 } }
- *     }
- *   }
- * }
- */
 const tree = metricParser.convert('1 + (2 + 3)');
-
-/**
- * ast =>
- * {
- *   code: 0, // success
- *   data: {
- *     AbstractSyntaxTree {
- *       type: 1, // operator
- *       value: '+',
- *       leftNode: AbstractSyntaxTree {
- *         type: 2, // value
- *         value: 1
- *       },
- *       rightNode: AbstractSyntaxTree {
- *         type: 1, // operator
- *         value: '+',
- *         leftNode: AbstractSyntaxTree {
- *           type: 1, // value
- *           value: 2
- *         },
- *         rightNode: AbstractSyntaxTree {
- *           type: 1, // value,
- *           value: 3
- *         }
- *       }
- *     }
- *   }
- */
-const ast = metricParser.convert('1 + (2 + 3)', true);
-
-/**
- * treeToExpression =>
- * [ 1, '+', '2', '+', '3' ] // optimized bracket
- */
 const treeToExpression = metricParser.convert(tree.data);
-
-/**
- * valid => true
- */
 const valid = metricParser.valid(tree.data);
+
+const ast = metricParser.convert('1 + (2 + 3)', true);
 
 // create new node
 const newAst = new metricParser.AbstractSyntaxTree('+');
@@ -124,85 +73,28 @@ newAst.leftNode = ast;
 // attach new node to right child
 netAst.rightNode = new metricParser.AbstractSyntaxTree(3);
 
-/**
- * expression => [ 1, '+', 2, '+', 3, '+', 3 ]
- */
 const expression = netAst.expression;
-
-/**
- * childExpression = [ 2, '+', 3 ]
- */
 const childExpression = newAst.leftNode.rightNode;
 
-// convert to tree
 const treeBuilder = new metricParser.TreeBuilder();
+
+// convert to tree
 const astToTree = treeBuilder.makeTree(ast);
 
-// convert to ast
+// convert to AST
 const treeToAst = treeBuilder.makeAst(tree);
 </script>
 ```
 
 #### Typescript
 ```typescript
-import { convert, valid, AbstractSyntaxTree, TreeBuilder } from 'metric-parser';
+import { convert, valid, AbstractSyntaxTree, TreeBuilder, Tree } from 'metric-parser';
 
-/**
- * tree =>
- * {
- *   code: 0, // success
- *   data: {
- *     operator: '+',
- *     operand1: { value: { type: 'unit', unit: 1 } },
- *     operand2: {
- *       operator: '+',
- *       operand1: { value: { type: 'unit', unit: 2 } },
- *       operand1: { value: { type: 'unit', unit: 3 } }
- *     }
- *   }
- * }
- */
 const tree = convert('1 + (2 + 3)');
-
-/**
- * ast =>
- * {
- *   code: 0, // success
- *   data: {
- *     AbstractSyntaxTree {
- *       type: 1, // operator
- *       value: '+',
- *       leftNode: AbstractSyntaxTree {
- *         type: 2, // value
- *         value: 1
- *       },
- *       rightNode: AbstractSyntaxTree {
- *         type: 1, // operator
- *         value: '+',
- *         leftNode: AbstractSyntaxTree {
- *           type: 1, // value
- *           value: 2
- *         },
- *         rightNode: AbstractSyntaxTree {
- *           type: 1, // value,
- *           value: 3
- *         }
- *       }
- *     }
- *   }
- */
-const ast = convert('1 + (2 + 3)', true);
-
-/**
- * treeToExpression =>
- * [ 1, '+', '2', '+', '3' ] // optimized bracket
- */
 const treeToExpression = convert(tree.data);
-
-/**
- * valid => true
- */
 const valid = valid(tree.data);
+
+const ast: AbstractSyntaxTree = convert('1 + (2 + 3)', true);
 
 // create new node
 const newAst = new AbstractSyntaxTree('+');
@@ -213,22 +105,16 @@ newAst.leftNode = ast;
 // attach new node to right child
 netAst.rightNode = new AbstractSyntaxTree(3);
 
-/**
- * expression => [ 1, '+', 2, '+', 3, '+', 3 ]
- */
 const expression = netAst.expression;
-
-/**
- * childExpression = [ 2, '+', 3 ]
- */
 const childExpression = newAst.leftNode.rightNode;
 
-// convert to tree
 const treeBuilder = new TreeBuilder();
-const astToTree = treeBuilder.makeTree(ast);
 
-// convert to ast
-const treeToAst = treeBuilder.makeAst(tree);
+// convert to tree
+const astToTree: Tree = treeBuilder.makeTree(ast);
+
+// convert to AST
+const treeToAst: AbstractSyntaxTree = treeBuilder.makeAst(tree);
 ```
 
 #### NodeJS
@@ -236,62 +122,11 @@ const treeToAst = treeBuilder.makeAst(tree);
 ```javascript
 const parser = require('metric-parser');
 
-/**
- * tree =>
- * {
- *   code: 0, // success
- *   data: {
- *     operator: '+',
- *     operand1: { value: { type: 'unit', unit: 1 } },
- *     operand2: {
- *       operator: '+',
- *       operand1: { value: { type: 'unit', unit: 2 } },
- *       operand1: { value: { type: 'unit', unit: 3 } }
- *     }
- *   }
- * }
- */
 const tree = parser.convert('1 + (2 + 3)');
-
-/**
- * ast =>
- * {
- *   code: 0, // success
- *   data: {
- *     AbstractSyntaxTree {
- *       type: 1, // operator
- *       value: '+',
- *       leftNode: AbstractSyntaxTree {
- *         type: 2, // value
- *         value: 1
- *       },
- *       rightNode: AbstractSyntaxTree {
- *         type: 1, // operator
- *         value: '+',
- *         leftNode: AbstractSyntaxTree {
- *           type: 1, // value
- *           value: 2
- *         },
- *         rightNode: AbstractSyntaxTree {
- *           type: 1, // value,
- *           value: 3
- *         }
- *       }
- *     }
- *   }
- */
-const ast = parser.convert('1 + (2 + 3)', true);
-
-/**
- * treeToExpression =>
- * [ 1, '+', '2', '+', '3' ] // optimized bracket
- */
 const treeToExpression = parser.convert(tree.data);
-
-/**
- * valid => true
- */
 const valid = parser.valid(tree.data);
+
+const ast = parser.convert('1 + (2 + 3)', true);
 
 // create new node
 const newAst = new parser.AbstractSyntaxTree('+');
@@ -302,22 +137,73 @@ newAst.leftNode = ast;
 // attach new node to right child
 netAst.rightNode = new parser.AbstractSyntaxTree(3);
 
-/**
- * expression => [ 1, '+', 2, '+', 3, '+', 3 ]
- */
 const expression = netAst.expression;
-
-/**
- * childExpression = [ 2, '+', 3 ]
- */
 const childExpression = newAst.leftNode.rightNode;
 
-// convert to tree
 const treeBuilder = new parser.TreeBuilder();
+
+// convert to tree
 const astToTree = treeBuilder.makeTree(ast);
 
-// convert to ast
+// convert to AST
 const treeToAst = treeBuilder.makeAst(tree);
+```
+
+----
+
+### DataType
+
+#### Tree
+> Tree is a simple object that converted from AST. 
+
+```typescript
+const result = convert('1 + (2 + 3)');
+const tree: Tree = result.data;
+```
+
+```json
+{
+  operator: '+',
+  operand1: { value: { type: 'unit', unit: 1 } },
+  operand2: {
+    operator: '+',
+    operand1: { value: { type: 'unit', unit: 2 } },
+    operand1: { value: { type: 'unit', unit: 3 } }
+  }
+}
+```
+
+#### AST (AbstractSyntaxTree)
+> AST is the most important object that contains the structure of a formula.
+
+```typescript
+const ast = convert('1 + (2 + 3)', true);
+
+```
+
+```typescript
+{
+  AbstractSyntaxTree {
+    type: 1, // operator
+    value: '+',
+    leftNode: AbstractSyntaxTree {
+      type: 2, // value
+      value: 1
+    },
+    rightNode: AbstractSyntaxTree {
+      type: 1, // operator
+      value: '+',
+      leftNode: AbstractSyntaxTree {
+        type: 1, // value
+        value: 2
+      },
+      rightNode: AbstractSyntaxTree {
+        type: 1, // value,
+        value: 3
+      }
+    }
+  }
+}
 ```
 
 ----
