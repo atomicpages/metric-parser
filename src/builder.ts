@@ -1,13 +1,13 @@
-import { ConvertData, ParseData } from './types';
 import { Tree } from './tree/simple.tree/type';
 import { ParserGeneralResult, ParserResult } from './parser/parser.result';
 import { BuilderHelper } from './builder.helper';
 import { ParserHelper } from './parser/parser.helper';
 import { TokenAnalyzer } from './token/token.analyzer';
-import { ErrorValue } from './error.value';
 import { BuilderMessage } from './builder.message';
 import { ParserError } from './error';
 import { TreeBuilder } from './tree/simple.tree/builder';
+import { BuilderError } from './builder.error';
+import { ConvertData, ParseData } from './metric.parser';
 
 export class Builder extends BuilderMessage {
     public constructor(private data: ConvertData) {
@@ -22,25 +22,29 @@ export class Builder extends BuilderMessage {
         }
     }
 
-    parse(data: ParseData, pos = 0): ParserResult<Tree> {
+    private parse(data: ParseData): ParserResult<Tree> {
         const tokenAnalyzer = new TokenAnalyzer(ParserHelper.getArray(data));
         const parseData = tokenAnalyzer.parse();
 
         return this.makeData(parseData);
     }
 
-    unparse(data: Tree): ParserGeneralResult {
+    private unparse(data: Tree): ParserGeneralResult {
         const treeBuilder = new TreeBuilder();
         const ast = treeBuilder.makeAst(data);
         return this.makeData(ast.expression);
     }
 
     private tryBuild() {
+        if (!this.data)
+            throw new ParserError(BuilderError.emptyData);
+
+
         if (BuilderHelper.needParse(this.data))
-            return this.parse(this.data as ParseData);
+            return this.parse(<ParseData>this.data);
 
         if (BuilderHelper.needUnparse(this.data))
-            return this.unparse(this.data as Tree);
+            return this.unparse(<Tree>this.data);
     }
 
     private handleError(error: ParserError): ParserResult<string> {

@@ -1,7 +1,7 @@
-import { Token } from './token/token';
-import { TokenHelper } from './token/token.helper';
-import { ParserError } from './error';
-import { TokenError } from './token/token.error';
+import { Token } from '../token/token';
+import { TokenHelper } from '../token/token.helper';
+import { ParserError } from '../error';
+import { TokenError } from '../token/token.error';
 
 export class AbstractSyntaxTreeBase {
     private _value: Token.Token;
@@ -71,7 +71,9 @@ export class AbstractSyntaxTreeBase {
 
     public findRoot(): this {
         if (this.isRoot())
-            return this;
+            return this.value !== undefined || !this.leftNode
+                ? this
+                : this.leftNode;
 
         return this._parent.findRoot();
     }
