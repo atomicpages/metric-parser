@@ -1,3 +1,5 @@
-dist/* linguist-vendored
-docs/**/* linguist-vendored
-demo/* linguist-vendored
+dist/* linguist-vendored=true
+docs/* linguist-vendored=true
+demo/* linguist-vendored=true
+*.html linguist-vendored=true
+*.css linguist-vendored=true
