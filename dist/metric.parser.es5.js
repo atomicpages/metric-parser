@@ -996,7 +996,7 @@ var TreeBuilder = /** @class */ (function (_super) {
     return TreeBuilder;
 }(TreeBuilderBase));
 
-var _MODULE_VERSION_ = '0.0.6';
+var _MODULE_VERSION_ = '0.0.7';
 function getVersion() {
     return _MODULE_VERSION_;
 }
@@ -1009,4 +1009,4 @@ function valid(data) {
     return builder.build(data).code === success;
 }
 
-export { getVersion, convert, valid, Builder, Parser, AbstractSyntaxTree, TokenAnalyzer, TreeBuilder, success, ParserError, BuilderError, TokenError, TreeError };
+export { getVersion, convert, valid };

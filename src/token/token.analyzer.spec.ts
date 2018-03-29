@@ -344,7 +344,7 @@ describe('case: parse with invalid data', () => {
     });
 
     it('should throw an emptyToken error with empty value', () => {
-        const data = [];
+        const data: Token.Token[] = [];
         const tokenAnalyzer = new TokenAnalyzer(data);
 
         expect(() => tokenAnalyzer.parse())

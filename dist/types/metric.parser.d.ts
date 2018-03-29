@@ -1,10 +1,6 @@
-export * from './tool';
-export * from './builder/builder';
-export * from './parser/parser';
-export * from './ast/ast';
-export * from './token/token.analyzer';
-export * from './tree/simple.tree/builder';
-export * from './error';
-export * from './builder/builder.error';
-export * from './token/token.error';
-export * from './tree/tree.error';
+import { ParserGeneralResult } from './parser/parser.result';
+import { Tree } from './tree/simple.tree/type';
+import { ParseData } from './parser/parser';
+export declare function getVersion(): string;
+export declare function convert(data: ParseData | Tree): ParserGeneralResult;
+export declare function valid(data: ParseData | Tree): boolean;

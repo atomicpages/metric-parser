@@ -13,10 +13,5 @@ export interface ValueObject {
     unit?: UnitValue;
 }
 export declare type Value = ItemValue | UnitValue;
-export interface ItemValue {
-    table: string;
-    key: string;
-    name: string;
-    oper: string;
-}
+export declare type ItemValue = any;
 export declare type UnitValue = string | number;

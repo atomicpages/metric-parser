@@ -1,10 +1,22 @@
-export * from './tool';
-export * from './builder/builder';
-export * from './parser/parser';
-export * from './ast/ast';
-export * from './token/token.analyzer';
-export * from './tree/simple.tree/builder';
-export * from './error';
-export * from './builder/builder.error';
-export * from './token/token.error';
-export * from './tree/tree.error';
+import { ParserGeneralResult } from './parser/parser.result';
+import { Builder } from './builder/builder';
+import { Tree } from './tree/simple.tree/type';
+import { ParseData } from './parser/parser';
+import { TreeBuilder } from './tree/simple.tree/builder';
+import { success } from './error';
+
+const _MODULE_VERSION_ = '0.0.7';
+
+export function getVersion() {
+    return _MODULE_VERSION_;
+}
+
+export function convert(data: ParseData | Tree): ParserGeneralResult {
+    const builder = new Builder(new TreeBuilder());
+    return builder.build(data);
+}
+
+export function valid(data: ParseData | Tree): boolean {
+    const builder = new Builder(new TreeBuilder());
+    return builder.build(data).code === success;
+}
