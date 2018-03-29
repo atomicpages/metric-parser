@@ -996,7 +996,7 @@ var TreeBuilder = /** @class */ (function (_super) {
     return TreeBuilder;
 }(TreeBuilderBase));
 
-var _MODULE_VERSION_ = '0.0.5';
+var _MODULE_VERSION_ = '0.0.6';
 function getVersion() {
     return _MODULE_VERSION_;
 }
