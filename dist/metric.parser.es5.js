@@ -290,6 +290,8 @@ var TokenError;
     TokenError.missingOperator = { code: 0x0112, text: 'the operator is missing after `{0}`' };
     TokenError.missingOpenBracket = { code: 0x0120, text: 'missing open bracket, you cannot close the bracket' };
     TokenError.missingCloseBracket = { code: 0x0121, text: 'missing close bracket, the bracket must be closed' };
+    TokenError.missingValueBefore = { code: 0x0122, text: 'missing value before `{0}` token' };
+    TokenError.missingValueAfter = { code: 0x0123, text: 'missing value after `{0}` token' };
     TokenError.emptyToken = { code: 0x0150, text: 'token is empty' };
 })(TokenError || (TokenError = {}));
 /* tslint:enable:max-line-length */
@@ -694,6 +696,53 @@ var GeneralError;
     GeneralError.methodNotImplemented = { code: 0x1001, text: 'method not implemented' };
 })(GeneralError || (GeneralError = {}));
 
+var AbstractSyntaxTreeValidator = /** @class */ (function () {
+    function AbstractSyntaxTreeValidator() {
+    }
+    AbstractSyntaxTreeValidator.validate = function (ast) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var validators = [
+            this.validateMissingValue,
+            this.validateMissingCloseBracket
+        ];
+        return validators
+            .map(function (validator) { return validator.apply(void 0, [ast].concat(args)); })
+            .find(function (validator) { return validator !== undefined; });
+    };
+    AbstractSyntaxTreeValidator.validateMissingValue = function (ast) {
+        if (!ast)
+            return;
+        var childError = AbstractSyntaxTreeValidator.validateChildMissingValue(ast);
+        return childError || AbstractSyntaxTreeValidator.validateCurrentMissingValue(ast);
+    };
+    AbstractSyntaxTreeValidator.validateCurrentMissingValue = function (ast) {
+        if (ast.type !== Token.Type.Operator || ast.leftNode && ast.rightNode)
+            return;
+        return !ast.leftNode
+            ? new ParserError(TokenError.missingValueBefore, ast.value)
+            : new ParserError(TokenError.missingValueAfter, ast.value);
+    };
+    AbstractSyntaxTreeValidator.validateChildMissingValue = function (ast) {
+        return [
+            AbstractSyntaxTreeValidator.validateMissingValue(ast.leftNode),
+            AbstractSyntaxTreeValidator.validateMissingValue(ast.rightNode)
+        ]
+            .find(function (error) { return error !== undefined; });
+    };
+    AbstractSyntaxTreeValidator.validateMissingCloseBracket = function (ast) {
+        if (ast.hasOpenBracket())
+            return new ParserError(TokenError.missingCloseBracket);
+    };
+    AbstractSyntaxTreeValidator.validateInvalidTwoOperator = function (ast, token, lastToken) {
+        if (!TokenHelper.isBracket(ast.value) && !ast.rightNode)
+            return new ParserError(TokenError.invalidTwoOperator, lastToken, token);
+    };
+    return AbstractSyntaxTreeValidator;
+}());
+
 var TokenAnalyzer = /** @class */ (function (_super) {
     __extends(TokenAnalyzer, _super);
     function TokenAnalyzer(token) {
@@ -738,8 +787,9 @@ var TokenAnalyzer = /** @class */ (function (_super) {
             throw new ParserError(TokenError.emptyToken);
     };
     TokenAnalyzer.prototype.postValidate = function () {
-        if (this.ast.hasOpenBracket())
-            throw new ParserError(TokenError.missingCloseBracket);
+        var error = AbstractSyntaxTreeValidator.validate(this.ast);
+        if (error)
+            throw error;
     };
     TokenAnalyzer.prototype.handleError = function (error) {
         if (error instanceof ParserError)
@@ -766,10 +816,8 @@ var TokenAnalyzer = /** @class */ (function (_super) {
         this.currentTree.insertNode(token);
     };
     TokenAnalyzer.prototype.analyzeBracketToken = function (token) {
-        var lastToken = this.popStack();
         if (TokenHelper.isBracketOpen(token)) {
-            if (lastToken && !TokenHelper.isSymbol(lastToken))
-                this.insertImplicitMultiplication();
+            this.analyzeImplicitToken();
             this.currentTree = this.currentTree.insertNode(token);
             return;
         }
@@ -783,14 +831,20 @@ var TokenAnalyzer = /** @class */ (function (_super) {
         var lastToken = this.popStack();
         if (TokenHelper.isOperator(lastToken))
             throw new ParserError(TokenError.invalidTwoOperator, lastToken, token);
-        if (!this.currentTree.value)
+        if (!this.currentTree.value) {
             this.currentTree.value = token;
-        else {
-            if (!TokenHelper.isBracket(this.currentTree.value) && !this.currentTree.rightNode)
-                throw new ParserError(TokenError.invalidTwoOperator, lastToken, token);
-            this.currentTree = this.currentTree.insertNode(token);
-            this.ast = this.ast.findRoot();
+            return;
         }
+        var error = AbstractSyntaxTreeValidator.validateInvalidTwoOperator(this.currentTree, token, lastToken);
+        if (error)
+            throw error;
+        this.currentTree = this.currentTree.insertNode(token);
+        this.ast = this.ast.findRoot();
+    };
+    TokenAnalyzer.prototype.analyzeImplicitToken = function () {
+        var lastToken = this.popStack();
+        if (lastToken && !TokenHelper.isSymbol(lastToken) || TokenHelper.isBracketClose(lastToken))
+            this.insertImplicitMultiplication();
     };
     TokenAnalyzer.prototype.insertImplicitMultiplication = function () {
         this.analyzeToken(Token.literal.Multiplication);
@@ -996,7 +1050,7 @@ var TreeBuilder = /** @class */ (function (_super) {
     return TreeBuilder;
 }(TreeBuilderBase));
 
-var _MODULE_VERSION_ = '0.0.7';
+var _MODULE_VERSION_ = '0.0.8';
 function getVersion() {
     return _MODULE_VERSION_;
 }

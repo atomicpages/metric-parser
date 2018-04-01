@@ -1,13 +1,12 @@
-import { Tree } from '../tree/simple.tree/type';
 import { TokenHelper } from './token.helper';
 import { Token } from './token';
 import { AbstractSyntaxTree } from '../ast/ast';
 import { TokenEnumerable } from './token.enumerable';
 import { ParserError } from '../error';
 import { TokenError } from './token.error';
-import { TreeBuilder } from '../tree/simple.tree/builder';
 import { TokenValidator } from './token.validator';
 import { GeneralError } from '../error.value';
+import { AbstractSyntaxTreeValidator } from '../ast/ast.validator';
 
 export class TokenAnalyzer extends TokenEnumerable {
     private ast: AbstractSyntaxTree;
@@ -60,8 +59,10 @@ export class TokenAnalyzer extends TokenEnumerable {
     }
 
     private postValidate() {
-        if (this.ast.hasOpenBracket())
-            throw new ParserError(TokenError.missingCloseBracket);
+        const error = AbstractSyntaxTreeValidator.validate(this.ast);
+
+        if (error)
+            throw error;
     }
 
     private handleError(error: ParserError) {
@@ -95,12 +96,9 @@ export class TokenAnalyzer extends TokenEnumerable {
         this.currentTree.insertNode(token);
     }
 
-    private analyzeBracketToken(token: Token.Token) {
-        const lastToken = this.popStack();
+    private analyzeBracketToken(token: Token.Token): void {
         if (TokenHelper.isBracketOpen(token)) {
-            if (lastToken && !TokenHelper.isSymbol(lastToken))
-                this.insertImplicitMultiplication();
-
+            this.analyzeImplicitToken();
             this.currentTree = this.currentTree.insertNode(token);
             return;
         }
@@ -112,21 +110,29 @@ export class TokenAnalyzer extends TokenEnumerable {
         }
     }
 
-    private analyzeOperatorToken(token: Token.Token) {
+    private analyzeOperatorToken(token: Token.Token): void {
         const lastToken = this.popStack();
 
         if (TokenHelper.isOperator(lastToken))
             throw new ParserError(TokenError.invalidTwoOperator, lastToken, token);
 
-        if (!this.currentTree.value)
+        if (!this.currentTree.value) {
             this.currentTree.value = token;
-        else {
-            if (!TokenHelper.isBracket(this.currentTree.value) && !this.currentTree.rightNode)
-                throw new ParserError(TokenError.invalidTwoOperator, lastToken, token);
-
-            this.currentTree = this.currentTree.insertNode(token);
-            this.ast = this.ast.findRoot();
+            return;
         }
+
+        const error = AbstractSyntaxTreeValidator.validateInvalidTwoOperator(this.currentTree, token, lastToken);
+        if (error)
+            throw error;
+
+        this.currentTree = this.currentTree.insertNode(token);
+        this.ast = this.ast.findRoot();
+    }
+
+    private analyzeImplicitToken() {
+        const lastToken = this.popStack();
+        if (lastToken && !TokenHelper.isSymbol(lastToken) || TokenHelper.isBracketClose(lastToken))
+            this.insertImplicitMultiplication();
     }
 
     private insertImplicitMultiplication() {
