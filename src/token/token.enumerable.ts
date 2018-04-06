@@ -106,13 +106,29 @@ export class TokenEnumerable {
 
     private findToken(): Token.Token {
         while (this.cursor < this.token.length) {
-            const token = this.token[this.cursor];
+            const token = this.getToken();
             this.cursor += 1;
             this.calculateStack(token);
 
             if (!TokenHelper.isWhiteSpace(token))
                 return token;
         }
+    }
+
+    private getToken(): Token.Token {
+        const token = this.token[this.cursor];
+        return this.getAliasToken(token);
+    }
+
+    private getAliasToken(token: Token.Token): Token.Token {
+        if (!TokenHelper.isOperator(token))
+            return token;
+
+        return Object.keys(Token.value)
+            .map(operatorType => Token.value[operatorType].symbols.includes(token)
+                ? Token.value[operatorType].alias
+                : undefined)
+            .find(alias => alias !== undefined) || token;
     }
 
     private isTokenArrayNumeric(tokens: Token.Token[]): boolean {
