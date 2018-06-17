@@ -206,9 +206,6 @@ var TokenHelper = /** @class */ (function (_super) {
     function TokenHelper() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    TokenHelper.isHigher = function (source, target) {
-        return TokenHelper.getPrecedence(source) - TokenHelper.getPrecedence(target) > 0;
-    };
     TokenHelper.induceType = function (token) {
         var typeInducers = [
             { predicate: TokenHelper.isUnkown, type: Token.Type.Unknown },
@@ -230,6 +227,9 @@ var TokenHelper = /** @class */ (function (_super) {
             [TokenHelper.isMod, TokenHelper.isPow],
             [TokenHelper.isBracket]
         ].findIndex(function (predicate) { return predicate.some(function (func) { return func(token); }); });
+    };
+    TokenHelper.getPrecedenceDiff = function (source, target) {
+        return TokenHelper.getPrecedence(source) - TokenHelper.getPrecedence(target);
     };
     return TokenHelper;
 }(TokenHelperBase));
@@ -475,7 +475,7 @@ var AbstractSyntaxTreeBase = /** @class */ (function (_super) {
             TokenHelper.isBracketOpen(this.value);
     };
     AbstractSyntaxTreeBase.prototype.isTokenHighest = function (token) {
-        return TokenHelper.isHigher(token, this.value) && this.subType !== Token.SubType.Group;
+        return TokenHelper.getPrecedenceDiff(token, this.value) > 0 && this.subType !== Token.SubType.Group;
     };
     AbstractSyntaxTreeBase.prototype.createChildNode = function (value) {
         var node = new this.constructor(value);
@@ -559,6 +559,13 @@ var AbstractSyntaxTree = /** @class */ (function (_super) {
             return undefined;
         return this.parent.findOperator();
     };
+    AbstractSyntaxTree.prototype.isNeededBracket = function () {
+        var parentOperator = this.getParentOperator();
+        return parentOperator &&
+            (TokenHelper.getPrecedenceDiff(parentOperator.value, this.value) > 0 ||
+                TokenHelper.getPrecedenceDiff(parentOperator.value, this.value) >= 0 &&
+                    this.parent.rightNode === this);
+    };
     AbstractSyntaxTree.prototype.findOperator = function () {
         if (this.type === Token.Type.Operator)
             return this;
@@ -569,16 +576,22 @@ var AbstractSyntaxTree = /** @class */ (function (_super) {
             ? this.makeOperatorExpression()
             : this.makeValueExpression();
     };
-    AbstractSyntaxTree.prototype.makeOperatorExpression = function () {
-        var expression = (this.leftNode ? this.leftNode.expression : []).concat([
+    AbstractSyntaxTree.prototype.makeOperatorClause = function () {
+        return (this.leftNode ? this.leftNode.expression : []).concat([
             this.value
         ], this.rightNode ? this.rightNode.expression : []);
-        var parentOperator = this.getParentOperator();
-        return parentOperator && TokenHelper.isHigher(parentOperator.value, this.value)
-            ? [Token.literal.BracketOpen].concat(expression, [Token.literal.BracketClose]) : expression;
+    };
+    AbstractSyntaxTree.prototype.makeOperatorExpression = function () {
+        var expression = this.makeOperatorClause();
+        return this.isNeededBracket()
+            ? this.wrapBracket(expression)
+            : expression;
     };
     AbstractSyntaxTree.prototype.makeValueExpression = function () {
         return [this.value];
+    };
+    AbstractSyntaxTree.prototype.wrapBracket = function (expression) {
+        return [Token.literal.BracketOpen].concat(expression, [Token.literal.BracketClose]);
     };
     return AbstractSyntaxTree;
 }(AbstractSyntaxTreeBase));
@@ -1059,13 +1072,15 @@ var TreeBuilder = /** @class */ (function (_super) {
         };
     };
     TreeBuilder.prototype.makeOperandValue = function (sourceNode) {
+        var _a;
         var type = TokenHelper.isObject(sourceNode.value)
             ? 'item'
             : 'unit';
         return _a = {
                 type: type
-            }, _a[type] = sourceNode.value, _a;
-        var _a;
+            },
+            _a[type] = sourceNode.value,
+            _a;
     };
     TreeBuilder.prototype.makeAstNode = function (node) {
         if (!node)
@@ -1101,7 +1116,7 @@ var TreeBuilder = /** @class */ (function (_super) {
     return TreeBuilder;
 }(TreeBuilderBase));
 
-var _MODULE_VERSION_ = '0.0.11';
+var _MODULE_VERSION_ = '0.0.12';
 function getVersion() {
     return _MODULE_VERSION_;
 }
