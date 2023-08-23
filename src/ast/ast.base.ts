@@ -1,171 +1,191 @@
-import { Token } from '../token/token';
-import { TokenHelper } from '../token/token.helper';
-import { ParserError } from '../error';
-import { TokenError } from '../token/token.error';
-import { AbstractSyntaxTreeNode } from './ast.node';
+import { Token } from "../token/token";
+import { TokenHelper } from "../token/token.helper";
+import { ParserError } from "../error";
+import { TokenError } from "../token/token.error";
+import { AbstractSyntaxTreeNode } from "./ast.node";
 
 export abstract class AbstractSyntaxTreeBase extends AbstractSyntaxTreeNode {
-    public findRoot(): this {
-        if (this.isRoot())
-            return this.value !== undefined || !this.leftNode
-                ? this
-                : this.leftNode;
-
-        return this._parent.findRoot();
+  public findRoot(): this {
+    if (this.isRoot()) {
+      return this.value !== undefined || !this.leftNode ? this : this.leftNode;
     }
 
-    public isRoot(): boolean {
-        return !this._parent;
+    return this._parent.findRoot();
+  }
+
+  public isRoot(): boolean {
+    return !this._parent;
+  }
+
+  public isValid(): boolean {
+    return (
+      (this.value && !this.leftNode && !this.rightNode) ||
+      (!!this.leftNode && !!this.rightNode)
+    );
+  }
+
+  public hasOpenBracket(): boolean {
+    if (TokenHelper.isBracketOpen(this.value)) {
+      return true;
     }
 
-    public isValid(): boolean {
-        return this.value && (!this.leftNode && !this.rightNode) || (!!this.leftNode && !!this.rightNode);
+    const leftNodeHasOpenBracket = this.leftNode
+      ? this.leftNode.hasOpenBracket()
+      : false;
+    const rightNodeHasOpenBracket = this.rightNode
+      ? this.rightNode.hasOpenBracket()
+      : false;
+
+    return leftNodeHasOpenBracket || rightNodeHasOpenBracket;
+  }
+
+  private findOpenedBracket(): this {
+    if (this.isRoot()) {
+      return undefined;
     }
 
-    public hasOpenBracket(): boolean {
-        if (TokenHelper.isBracketOpen(this.value))
-            return true;
-
-        const leftNodeHasOpenBracket = this.leftNode ? this.leftNode.hasOpenBracket() : false;
-        const rightNodeHasOpenBracket = this.rightNode ? this.rightNode.hasOpenBracket() : false;
-
-        return leftNodeHasOpenBracket || rightNodeHasOpenBracket;
+    if (TokenHelper.isBracketOpen(this._value)) {
+      return this;
     }
 
-    private findOpenedBracket(): this {
-        if (this.isRoot())
-            return undefined;
+    return this._parent.findOpenedBracket();
+  }
 
-        if (TokenHelper.isBracketOpen(this._value))
-            return this;
+  public removeRootBracket(): this {
+    const rootNode = this.findRoot();
 
-        return this._parent.findOpenedBracket();
+    if (TokenHelper.isBracketOpen(rootNode.value)) {
+      rootNode.leftNode.removeParent();
     }
 
-    public removeRootBracket(): this {
-        const rootNode = this.findRoot();
+    return this === rootNode ? rootNode.leftNode : this;
+  }
 
-        if (TokenHelper.isBracketOpen(rootNode.value))
-            rootNode.leftNode.removeParent();
+  public removeClosestBracket(): this {
+    const node = this.findOpenedBracket();
 
-        return this === rootNode
-            ? rootNode.leftNode
-            : this;
+    if (!node) {
+      throw new ParserError(TokenError.missingOpenBracket);
     }
 
-    public removeClosestBracket(): this {
-        const node = this.findOpenedBracket();
+    const targetNode = node.leftNode;
+    targetNode.subType = Token.SubType.Group;
 
-        if (!node)
-            throw new ParserError(TokenError.missingOpenBracket);
-
-        const targetNode = node.leftNode;
-        targetNode.subType = Token.SubType.Group;
-
-        if (!node.parent) {
-            targetNode.removeParent();
-            return targetNode;
-        }
-
-        if (node.parent.leftNode === node)
-            node.parent.leftNode = targetNode;
-        else
-            node.parent.rightNode = targetNode;
-
-        return node.parent;
+    if (!node.parent) {
+      targetNode.removeParent();
+      return targetNode;
     }
 
-    private climbUp(token: Token.Token): this {
-        return this.isClimbTop(token)
-            ? this
-            : this._parent.climbUp(token);
+    if (node.parent.leftNode === node) {
+      node.parent.leftNode = targetNode;
+    } else {
+      node.parent.rightNode = targetNode;
     }
 
-    private isClimbTop(token: Token.Token) {
-        return this.isTokenHighest(token) ||
-            !this.parent ||
-            TokenHelper.isBracketOpen(this.value);
+    return node.parent;
+  }
+
+  private climbUp(token: Token.Token): this {
+    return this.isClimbTop(token) ? this : this._parent.climbUp(token);
+  }
+
+  private isClimbTop(token: Token.Token) {
+    return (
+      this.isTokenHighest(token) ||
+      !this.parent ||
+      TokenHelper.isBracketOpen(this.value)
+    );
+  }
+
+  private isTokenHighest(token: Token.Token) {
+    return (
+      TokenHelper.getPrecedenceDiff(token, this.value) > 0 &&
+      this.subType !== Token.SubType.Group
+    );
+  }
+
+  private createChildNode(value?: Token.Token): this {
+    const node = new (this.constructor as any)(value);
+    node.parent = this;
+    return node;
+  }
+
+  private createParentNode(value?: Token.Token): this {
+    const node = new (this.constructor as any)(value);
+    this.parent = node;
+    return node;
+  }
+
+  private insertOperatorNode(value: Token.Token) {
+    const rootNode = this.climbUp(value);
+
+    if (TokenHelper.isBracketOpen(rootNode.value)) {
+      return rootNode.insertJointNodeToLeft(value);
     }
 
-    private isTokenHighest(token: Token.Token) {
-        return TokenHelper.getPrecedenceDiff(token, this.value) > 0 && this.subType !== Token.SubType.Group;
+    if (this.needJointRight(rootNode, value)) {
+      return rootNode.insertJointNodeToRight(value);
     }
 
-    private createChildNode(value?: Token.Token): this {
-        const node = new (<any>this.constructor)(value);
-        node.parent = this;
-        return node;
+    const newNode = rootNode.createParentNode(value);
+    newNode.leftNode = rootNode;
+    return newNode;
+  }
+
+  private needJointRight(rootNode: this, value: Token.Token) {
+    return (
+      (rootNode.isTokenHighest(value) && rootNode.parent) || this === rootNode
+    );
+  }
+
+  public insertNode(value: Token.Token): this {
+    if (TokenHelper.isSymbol(value)) {
+      if (!this.value) {
+        this.value = value;
+        return this;
+      }
     }
 
-    private createParentNode(value?: Token.Token): this {
-        const node = new (<any>this.constructor)(value);
-        this.parent = node;
-        return node;
+    if (TokenHelper.isOperator(value)) {
+      return this.insertOperatorNode(value);
     }
 
-    private insertOperatorNode(value: Token.Token) {
-        const rootNode = this.climbUp(value);
-
-        if (TokenHelper.isBracketOpen(rootNode.value))
-            return rootNode.insertJointNodeToLeft(value);
-
-        if (this.needJointRight(rootNode, value))
-            return rootNode.insertJointNodeToRight(value);
-
-        const newNode = rootNode.createParentNode(value);
-        newNode.leftNode = rootNode;
-        return newNode;
+    const valueNode = this.createChildNode(value);
+    if (!this.leftNode) {
+      this.leftNode = valueNode;
+    } else {
+      this.rightNode = valueNode;
     }
 
-    private needJointRight(rootNode: this, value: Token.Token) {
-        return rootNode.isTokenHighest(value) && rootNode.parent || this === rootNode;
-    }
+    return valueNode;
+  }
 
-    public insertNode(value: Token.Token): this {
-        if (TokenHelper.isSymbol(value))
-            if (!this.value) {
-                this.value = value;
-                return this;
-            }
+  private insertJointNodeToLeft(value: Token.Token) {
+    const jointNode = this.createChildNode(value);
+    jointNode.leftNode = this.leftNode;
+    jointNode.rightNode = this.rightNode;
+    this.leftNode = jointNode;
+    return jointNode;
+  }
 
-        if (TokenHelper.isOperator(value))
-            return this.insertOperatorNode(value);
+  public insertJointNodeToRight(value: Token.Token) {
+    const jointNode = this.createChildNode(value);
+    jointNode.leftNode = this.rightNode;
+    this.rightNode = jointNode;
+    return jointNode;
+  }
 
-        const valueNode = this.createChildNode(value);
-        if (!this.leftNode)
-            this.leftNode = valueNode;
-        else
-            this.rightNode = valueNode;
+  public removeLeftNode() {
+    this._leftNode.removeParent();
+    this._leftNode = undefined;
+  }
 
-        return valueNode;
-    }
+  public removeRightNode() {
+    this._rightNode.removeParent();
+    this._rightNode = undefined;
+  }
 
-    private insertJointNodeToLeft(value: Token.Token) {
-        const jointNode = this.createChildNode(value);
-        jointNode.leftNode = this.leftNode;
-        jointNode.rightNode = this.rightNode;
-        this.leftNode = jointNode;
-        return jointNode;
-    }
-
-    public insertJointNodeToRight(value: Token.Token) {
-        const jointNode = this.createChildNode(value);
-        jointNode.leftNode = this.rightNode;
-        this.rightNode = jointNode;
-        return jointNode;
-    }
-
-    public removeLeftNode() {
-        this._leftNode.removeParent();
-        this._leftNode = undefined;
-    }
-
-    public removeRightNode() {
-        this._rightNode.removeParent();
-        this._rightNode = undefined;
-    }
-
-    public removeParent() {
-        this._parent = undefined;
-    }
+  public removeParent() {
+    this._parent = undefined;
+  }
 }

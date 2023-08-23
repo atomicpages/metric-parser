@@ -1,118 +1,122 @@
-import { expect } from 'chai';
-import { AbstractSyntaxTree } from '../../ast/ast';
-import { Token } from '../../token/token';
-import { Operand, Tree } from './type';
-import { TreeBuilder } from './builder';
-import { AbstractSyntaxTreeHelper } from '../../ast/ast.helper';
-import { TreeError } from '../tree.error';
+import { expect, describe, it } from "vitest";
+import { AbstractSyntaxTree } from "../../ast/ast";
+import { Token } from "../../token/token";
+import type { Operand, Tree } from "./type";
+import { TreeBuilder } from "./builder";
+import { TreeError } from "../tree.error";
 
-describe('test method: SimpleTree.makeTree()', () => {
-    it('should return parser tree', () => {
-        const ast = new AbstractSyntaxTree(Token.literal.Multiplication);
-        ast.leftNode = new AbstractSyntaxTree('2');
-        ast.rightNode = new AbstractSyntaxTree('3');
-        const treeBuilder = new TreeBuilder();
-        const tree = treeBuilder.makeTree(ast);
-        const leftOperand = tree.operand1 as Operand;
-        const rightOperand = tree.operand2 as Operand;
+describe("test method: SimpleTree.makeTree()", () => {
+  it("should return parser tree", () => {
+    const ast = new AbstractSyntaxTree(Token.literal.Multiplication);
+    ast.leftNode = new AbstractSyntaxTree("2");
+    ast.rightNode = new AbstractSyntaxTree("3");
+    const treeBuilder = new TreeBuilder();
+    const tree = treeBuilder.makeTree(ast);
+    const leftOperand = tree.operand1 as Operand;
+    const rightOperand = tree.operand2 as Operand;
 
-        expect(tree.operator).to.equal('*');
-        expect(leftOperand).to.be.an('object');
-        expect(rightOperand).to.be.an('object');
-        expect(leftOperand.value.type).to.equal('unit');
-        expect(leftOperand.value.unit).to.equal(2);
-        expect(rightOperand.value.type).to.equal('unit');
-        expect(rightOperand.value.unit).to.equal(3);
-    });
+    expect(tree.operator).to.equal("*");
+    expect(leftOperand).to.be.an("object");
+    expect(rightOperand).to.be.an("object");
+    expect(leftOperand.value.type).to.equal("unit");
+    expect(leftOperand.value.unit).to.equal(2);
+    expect(rightOperand.value.type).to.equal("unit");
+    expect(rightOperand.value.unit).to.equal(3);
+  });
 
-    it('should return advanced parser tree', () => {
-        const customInput = {
-            value: 1.56,
-            type: 'decimal',
-            aggregate: 'avg'
-        };
-        const customInput2 = {
-            value: 'a',
-            type: 'string',
-            aggregate: 'none'
-        };
-        const subNode = new AbstractSyntaxTree(Token.literal.Division);
-        subNode.leftNode = new AbstractSyntaxTree('3');
-        subNode.rightNode = new AbstractSyntaxTree(customInput2);
-        const ast = new AbstractSyntaxTree(Token.literal.Addition);
-        ast.leftNode = new AbstractSyntaxTree(customInput);
-        ast.rightNode = subNode;
-        const treeBuilder = new TreeBuilder();
-        const tree = treeBuilder.makeTree(ast);
-        const leftOperand = tree.operand1 as Operand;
-        const rightOperand = tree.operand2 as Tree;
-        const leftOperandOfRightNode = rightOperand.operand1 as Operand;
-        const rightOperandOfRightNode = rightOperand.operand2 as Operand;
+  it("should return advanced parser tree", () => {
+    const customInput = {
+      value: 1.56,
+      type: "decimal",
+      aggregate: "avg",
+    };
+    const customInput2 = {
+      value: "a",
+      type: "string",
+      aggregate: "none",
+    };
 
-        expect(tree.operator).to.equal(Token.literal.Addition);
-        expect(leftOperand).to.be.an('object');
-        expect(rightOperand).to.be.an('object');
-        expect(leftOperand.value.type).to.equal('item');
-        expect(leftOperand.value.item).to.deep.equal(customInput);
-        expect(rightOperand.operator).to.equal(Token.literal.Division);
-        expect(leftOperandOfRightNode).to.be.an('object');
-        expect(rightOperandOfRightNode).to.be.an('object');
-        expect(leftOperandOfRightNode.value.type).to.equal('unit');
-        expect(leftOperandOfRightNode.value.unit).to.equal(3);
-        expect(rightOperandOfRightNode.value.type).to.equal('item');
-        expect(rightOperandOfRightNode.value.item).to.deep.equal(customInput2);
-    });
+    const subNode = new AbstractSyntaxTree(Token.literal.Division);
+    subNode.leftNode = new AbstractSyntaxTree("3");
+    subNode.rightNode = new AbstractSyntaxTree(customInput2);
 
-    it('should throw an emptyAst error with empty ast', () => {
-        const treeBuilder = new TreeBuilder();
+    const ast = new AbstractSyntaxTree(Token.literal.Addition);
+    ast.leftNode = new AbstractSyntaxTree(customInput);
+    ast.rightNode = subNode;
 
-        expect(() => treeBuilder.makeTree(undefined))
-            .to.throw('AST is empty')
-            .and.that.have.property('code', TreeError.emptyAst.code);
-    });
+    const treeBuilder = new TreeBuilder();
+    const tree = treeBuilder.makeTree(ast);
 
-    it('should throw an invalidParserTree error with invalid ast', () => {
-        const ast = new AbstractSyntaxTree(Token.literal.Addition);
-        const treeBuilder = new TreeBuilder();
-        ast.leftNode = new AbstractSyntaxTree(1);
+    const leftOperand = tree.operand1 as Operand;
+    const rightOperand = tree.operand2 as Tree;
 
-        expect(() => treeBuilder.makeTree(ast))
-            .to.throw('invalid parser tree')
-            .and.that.have.property('code', TreeError.invalidParserTree.code);
-    });
+    const leftOperandOfRightNode = rightOperand.operand1 as Operand;
+    const rightOperandOfRightNode = rightOperand.operand2 as Operand;
+
+    expect(tree.operator).to.equal(Token.literal.Addition);
+    expect(leftOperand).to.be.an("object");
+    expect(rightOperand).to.be.an("object");
+    expect(leftOperand.value.type).to.equal("item");
+    expect(leftOperand.value.item).to.deep.equal(customInput);
+    expect(rightOperand.operator).to.equal(Token.literal.Division);
+    expect(leftOperandOfRightNode).to.be.an("object");
+    expect(rightOperandOfRightNode).to.be.an("object");
+    expect(leftOperandOfRightNode.value.type).to.equal("unit");
+    expect(leftOperandOfRightNode.value.unit).to.equal(3);
+    expect(rightOperandOfRightNode.value.type).to.equal("item");
+    expect(rightOperandOfRightNode.value.item).to.deep.equal(customInput2);
+  });
+
+  it("should throw an emptyAst error with empty ast", () => {
+    const treeBuilder = new TreeBuilder();
+
+    expect(() => treeBuilder.makeTree(undefined))
+      .to.throw("AST is empty")
+      .and.that.have.property("code", TreeError.emptyAst.code);
+  });
+
+  it("should throw an invalidParserTree error with invalid ast", () => {
+    const ast = new AbstractSyntaxTree(Token.literal.Addition);
+    const treeBuilder = new TreeBuilder();
+    ast.leftNode = new AbstractSyntaxTree(1);
+
+    expect(() => treeBuilder.makeTree(ast))
+      .to.throw("invalid parser tree")
+      .and.that.have.property("code", TreeError.invalidParserTree.code);
+  });
 });
 
-describe('test method: SimpleTree.makeAst()', () => {
-    it('should return ast', () => {
-        const data: Tree = {
-            operator: '*',
-            operand1: {
-                operator: '-',
-                operand1: { value: { type: 'unit', unit: 2 } },
-                operand2: { value: { type: 'unit', unit: 1 } }
-            },
-            operand2: { value: { type: 'unit', unit: 3 } }
-        };
-        const treeBuilder = new TreeBuilder();
-        const ast = treeBuilder.makeAst(data);
+describe("test method: SimpleTree.makeAst()", () => {
+  it("should return ast", () => {
+    const data: Tree = {
+      operator: "*",
+      operand1: {
+        operator: "-",
+        operand1: { value: { type: "unit", unit: 2 } },
+        operand2: { value: { type: "unit", unit: 1 } },
+      },
+      operand2: { value: { type: "unit", unit: 3 } },
+    };
+    const treeBuilder = new TreeBuilder();
+    const ast = treeBuilder.makeAst(data);
 
-        expect(ast.type).to.equal(Token.Type.Operator);
-        expect(ast.value).to.equal(Token.literal.Multiplication);
-        expect(ast.leftNode.type).to.equal(Token.Type.Operator);
-        expect(ast.leftNode.value).to.equal(Token.literal.Subtraction);
-        expect(ast.leftNode.leftNode.type).to.equal(Token.Type.Value);
-        expect(ast.leftNode.leftNode.value).to.equal(2);
-        expect(ast.leftNode.rightNode.type).to.equal(Token.Type.Value);
-        expect(ast.leftNode.rightNode.value).to.equal(1);
-        expect(ast.rightNode.type).to.equal(Token.Type.Value);
-        expect(ast.rightNode.value).to.equal(3);
-    });
+    expect(ast.type).to.equal(Token.Type.Operator);
+    expect(ast.value).to.equal(Token.literal.Multiplication);
+    expect(ast.leftNode.type).to.equal(Token.Type.Operator);
+    expect(ast.leftNode.value).to.equal(Token.literal.Subtraction);
+    expect(ast.leftNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.leftNode.leftNode.value).to.equal(2);
+    expect(ast.leftNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(ast.leftNode.rightNode.value).to.equal(1);
+    expect(ast.rightNode.type).to.equal(Token.Type.Value);
+    expect(ast.rightNode.value).to.equal(3);
+  });
 
-    it('should throw an emptyTree error with empty tree', () => {
-        const treeBuilder = new TreeBuilder();
+  it("should throw an emptyTree error with empty tree", () => {
+    const treeBuilder = new TreeBuilder();
 
-        expect(() => treeBuilder.makeAst(undefined))
-            .to.throw('tree is empty')
-            .and.that.have.property('code', TreeError.emptyTree.code);
-    });
+    expect(() => treeBuilder.makeAst(undefined))
+      .to.throw("tree is empty")
+      .and.that.have.property("code", TreeError.emptyTree.code);
+  });
 });

@@ -1,13 +1,11 @@
-import { ParseData } from './parser';
+import type { ParseData } from "./parser";
 
 export class ParserHelper {
-    public static getArray(data: ParseData): string[] {
-        return typeof data === 'string'
-            ? this.stringToArray(data as string)
-            : data;
-    }
+  public static getArray(data: ParseData): string[] {
+    return typeof data === "string" ? this.stringToArray(data) : data;
+  }
 
-    private static stringToArray(value: string): string[] {
-        return value.split('');
-    };
+  private static stringToArray(value: string): string[] {
+    return value.split("");
+  }
 }
