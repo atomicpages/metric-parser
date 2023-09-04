@@ -1,0 +1,9 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "./**/*.ts",
+  ],
+  "out": "docs",
+  "exclude": ["*.spec.*"],
+  "theme": "default"
+}

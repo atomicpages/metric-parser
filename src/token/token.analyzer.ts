@@ -1,5 +1,5 @@
 import { TokenHelper } from "./token.helper";
-import { Token } from "./token";
+import { literal, type Token } from "./token";
 import { AbstractSyntaxTree } from "../ast/ast";
 import { TokenEnumerable } from "./token.enumerable";
 import { ParserError } from "../error";
@@ -12,7 +12,7 @@ export class TokenAnalyzer extends TokenEnumerable {
   private ast: AbstractSyntaxTree = null;
   private currentTree: AbstractSyntaxTree = null;
 
-  constructor(token: Token.Token[]) {
+  constructor(token: Token[]) {
     super(token);
   }
 
@@ -27,7 +27,7 @@ export class TokenAnalyzer extends TokenEnumerable {
   }
 
   private initialize() {
-    this.ast = new AbstractSyntaxTree(Token.literal.BracketOpen);
+    this.ast = new AbstractSyntaxTree(literal.BracketOpen);
     this.ast.leftNode = new AbstractSyntaxTree();
     this.currentTree = this.ast.leftNode;
     this.rewind();
@@ -38,7 +38,7 @@ export class TokenAnalyzer extends TokenEnumerable {
   }
 
   private makeAst() {
-    let token: Token.Token;
+    let token: Token;
 
     while ((token = this.next())) {
       this.try(() => this.doAnalyzeToken(token));
@@ -77,12 +77,12 @@ export class TokenAnalyzer extends TokenEnumerable {
     throw new ParserError(GeneralError.unknownError).withStack(this.stack);
   }
 
-  private doAnalyzeToken(token: Token.Token) {
+  private doAnalyzeToken(token: Token) {
     this.analyzeToken(token);
     this.addStack(token);
   }
 
-  private analyzeToken(token: Token.Token) {
+  private analyzeToken(token: Token) {
     const lastToken = this.popStack();
     if (TokenHelper.isBracket(token)) {
       this.analyzeBracketToken(token);
@@ -102,7 +102,7 @@ export class TokenAnalyzer extends TokenEnumerable {
     this.currentTree.insertNode(token);
   }
 
-  private analyzeBracketToken(token: Token.Token): void {
+  private analyzeBracketToken(token: Token): void {
     if (TokenHelper.isBracketOpen(token)) {
       this.analyzeImplicitToken();
       this.currentTree = this.currentTree.insertNode(token);
@@ -116,7 +116,7 @@ export class TokenAnalyzer extends TokenEnumerable {
     }
   }
 
-  private analyzeOperatorToken(token: Token.Token): void {
+  private analyzeOperatorToken(token: Token): void {
     const lastToken = this.popStack();
 
     if (TokenHelper.isOperator(lastToken)) {
@@ -152,7 +152,7 @@ export class TokenAnalyzer extends TokenEnumerable {
   }
 
   private insertImplicitMultiplication() {
-    this.analyzeToken(Token.literal.Multiplication);
-    this.addStack(Token.literal.Multiplication);
+    this.analyzeToken(literal.Multiplication);
+    this.addStack(literal.Multiplication);
   }
 }

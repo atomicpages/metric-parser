@@ -1,6 +1,7 @@
 import { expect, describe, it } from "vitest";
 import { TokenAnalyzer } from "./token.analyzer";
-import { Token } from "./token";
+import type { Token } from "./token";
+import { SubType, Type, literal } from "./token";
 import type { ParserError } from "../error";
 import { TokenError } from "./token.error";
 
@@ -11,11 +12,11 @@ describe("case: basic parse token", () => {
     tokenAnalyzer.parse();
     const ast = tokenAnalyzer.getAst();
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Addition);
-    expect(ast.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Addition);
+    expect(ast.leftNode.type).to.equal(Type.Value);
     expect(ast.leftNode.value).to.equal(1);
-    expect(ast.rightNode.type).to.equal(Token.Type.Value);
+    expect(ast.rightNode.type).to.equal(Type.Value);
     expect(ast.rightNode.value).to.equal(2);
   });
 
@@ -26,15 +27,15 @@ describe("case: basic parse token", () => {
     const ast = tokenAnalyzer.getAst();
     const leftNode = ast.leftNode;
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Addition);
-    expect(leftNode.type).to.equal(Token.Type.Operator);
-    expect(leftNode.value).to.equal(Token.literal.Addition);
-    expect(leftNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Addition);
+    expect(leftNode.type).to.equal(Type.Operator);
+    expect(leftNode.value).to.equal(literal.Addition);
+    expect(leftNode.leftNode.type).to.equal(Type.Value);
     expect(leftNode.leftNode.type).to.equal(1);
-    expect(leftNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(leftNode.rightNode.type).to.equal(Type.Value);
     expect(leftNode.rightNode.value).to.equal(2.56);
-    expect(ast.rightNode.type).to.equal(Token.Type.Value);
+    expect(ast.rightNode.type).to.equal(Type.Value);
     expect(ast.rightNode.value).to.equal(3);
   });
 
@@ -45,15 +46,15 @@ describe("case: basic parse token", () => {
     const ast = tokenAnalyzer.getAst();
     const rightNode = ast.rightNode;
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Addition);
-    expect(ast.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Addition);
+    expect(ast.leftNode.type).to.equal(Type.Value);
     expect(ast.leftNode.value).to.equal(1);
-    expect(rightNode.type).to.equal(Token.Type.Operator);
-    expect(rightNode.value).to.equal(Token.literal.Multiplication);
-    expect(rightNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.type).to.equal(Type.Operator);
+    expect(rightNode.value).to.equal(literal.Multiplication);
+    expect(rightNode.leftNode.type).to.equal(Type.Value);
     expect(rightNode.leftNode.value).to.equal(2);
-    expect(rightNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.rightNode.type).to.equal(Type.Value);
     expect(rightNode.rightNode.value).to.equal(3);
   });
 
@@ -64,15 +65,15 @@ describe("case: basic parse token", () => {
     const ast = tokenAnalyzer.getAst();
     const leftNode = ast.leftNode;
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Division);
-    expect(leftNode.type).to.equal(Token.Type.Operator);
-    expect(leftNode.value).to.equal(Token.literal.Multiplication);
-    expect(leftNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Division);
+    expect(leftNode.type).to.equal(Type.Operator);
+    expect(leftNode.value).to.equal(literal.Multiplication);
+    expect(leftNode.leftNode.type).to.equal(Type.Value);
     expect(leftNode.leftNode.value).to.equal(1);
-    expect(leftNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(leftNode.rightNode.type).to.equal(Type.Value);
     expect(leftNode.rightNode.value).to.equal(2);
-    expect(ast.rightNode.type).to.equal(Token.Type.Value);
+    expect(ast.rightNode.type).to.equal(Type.Value);
     expect(ast.rightNode.value).to.equal(3);
   });
 
@@ -83,15 +84,15 @@ describe("case: basic parse token", () => {
     const ast = tokenAnalyzer.getAst();
     const leftNode = ast.leftNode;
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Addition);
-    expect(leftNode.type).to.equal(Token.Type.Operator);
-    expect(leftNode.value).to.equal(Token.literal.Multiplication);
-    expect(leftNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Addition);
+    expect(leftNode.type).to.equal(Type.Operator);
+    expect(leftNode.value).to.equal(literal.Multiplication);
+    expect(leftNode.leftNode.type).to.equal(Type.Value);
     expect(leftNode.leftNode.value).to.equal(1);
-    expect(leftNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(leftNode.rightNode.type).to.equal(Type.Value);
     expect(leftNode.rightNode.value).to.equal(2);
-    expect(ast.rightNode.type).to.equal(Token.Type.Value);
+    expect(ast.rightNode.type).to.equal(Type.Value);
     expect(ast.rightNode.value).to.equal(3);
   });
 });
@@ -104,16 +105,16 @@ describe("case: parse token with bracket", () => {
     const ast = tokenAnalyzer.getAst();
     const leftNode = ast.leftNode;
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Multiplication);
-    expect(leftNode.type).to.equal(Token.Type.Operator);
-    expect(leftNode.subType).to.equal(Token.SubType.Group);
-    expect(leftNode.value).to.equal(Token.literal.Addition);
-    expect(leftNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Multiplication);
+    expect(leftNode.type).to.equal(Type.Operator);
+    expect(leftNode.subType).to.equal(SubType.Group);
+    expect(leftNode.value).to.equal(literal.Addition);
+    expect(leftNode.leftNode.type).to.equal(Type.Value);
     expect(leftNode.leftNode.value).to.equal(1);
-    expect(leftNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(leftNode.rightNode.type).to.equal(Type.Value);
     expect(leftNode.rightNode.value).to.equal(2);
-    expect(ast.rightNode.type).to.equal(Token.Type.Value);
+    expect(ast.rightNode.type).to.equal(Type.Value);
     expect(ast.rightNode.value).to.equal(3);
   });
 
@@ -125,20 +126,20 @@ describe("case: parse token with bracket", () => {
     const leftNode = ast.leftNode;
     const rightNode = ast.rightNode;
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Addition);
-    expect(leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Addition);
+    expect(leftNode.type).to.equal(Type.Value);
     expect(leftNode.value).to.equal(1);
-    expect(rightNode.type).to.equal(Token.Type.Operator);
-    expect(rightNode.value).to.equal(Token.literal.Multiplication);
-    expect(rightNode.leftNode.type).to.equal(Token.Type.Operator);
-    expect(rightNode.leftNode.subType).to.equal(Token.SubType.Group);
-    expect(rightNode.leftNode.value).to.equal(Token.literal.Addition);
-    expect(rightNode.leftNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.type).to.equal(Type.Operator);
+    expect(rightNode.value).to.equal(literal.Multiplication);
+    expect(rightNode.leftNode.type).to.equal(Type.Operator);
+    expect(rightNode.leftNode.subType).to.equal(SubType.Group);
+    expect(rightNode.leftNode.value).to.equal(literal.Addition);
+    expect(rightNode.leftNode.leftNode.type).to.equal(Type.Value);
     expect(rightNode.leftNode.leftNode.value).to.equal(2);
-    expect(rightNode.leftNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.leftNode.rightNode.type).to.equal(Type.Value);
     expect(rightNode.leftNode.rightNode.value).to.equal(3);
-    expect(rightNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.rightNode.type).to.equal(Type.Value);
     expect(rightNode.rightNode.value).to.equal(4);
   });
 
@@ -172,22 +173,22 @@ describe("case: parse token with bracket", () => {
     const leftNode = ast.leftNode;
     const rightNode = ast.rightNode;
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.subType).to.equal(Token.SubType.Group);
-    expect(ast.value).to.equal(Token.literal.Addition);
-    expect(leftNode.type).to.equal(Token.Type.Operator);
-    expect(leftNode.subType).to.equal(Token.SubType.Group);
-    expect(leftNode.value).to.equal(Token.literal.Addition);
-    expect(leftNode.leftNode.type).to.equal(Token.Type.Operator);
-    expect(leftNode.leftNode.value).to.equal(Token.literal.Addition);
-    expect(leftNode.leftNode.subType).to.equal(Token.SubType.Group);
-    expect(leftNode.leftNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.subType).to.equal(SubType.Group);
+    expect(ast.value).to.equal(literal.Addition);
+    expect(leftNode.type).to.equal(Type.Operator);
+    expect(leftNode.subType).to.equal(SubType.Group);
+    expect(leftNode.value).to.equal(literal.Addition);
+    expect(leftNode.leftNode.type).to.equal(Type.Operator);
+    expect(leftNode.leftNode.value).to.equal(literal.Addition);
+    expect(leftNode.leftNode.subType).to.equal(SubType.Group);
+    expect(leftNode.leftNode.leftNode.type).to.equal(Type.Value);
     expect(leftNode.leftNode.leftNode.value).to.equal(1);
-    expect(leftNode.leftNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(leftNode.leftNode.rightNode.type).to.equal(Type.Value);
     expect(leftNode.leftNode.rightNode.value).to.equal(2);
-    expect(leftNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(leftNode.rightNode.type).to.equal(Type.Value);
     expect(leftNode.rightNode.value).to.equal(3);
-    expect(rightNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.type).to.equal(Type.Value);
     expect(rightNode.value).to.equal(4);
   });
 
@@ -199,24 +200,24 @@ describe("case: parse token with bracket", () => {
     const leftNode = ast.leftNode;
     const rightNode = ast.rightNode;
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Subtraction);
-    expect(leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Subtraction);
+    expect(leftNode.type).to.equal(Type.Value);
     expect(leftNode.value).to.equal(6);
-    expect(rightNode.type).to.equal(Token.Type.Operator);
-    expect(rightNode.value).to.equal(Token.literal.Division);
-    expect(rightNode.leftNode.type).to.equal(Token.Type.Operator);
-    expect(rightNode.leftNode.value).to.equal(Token.literal.Multiplication);
-    expect(rightNode.leftNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.type).to.equal(Type.Operator);
+    expect(rightNode.value).to.equal(literal.Division);
+    expect(rightNode.leftNode.type).to.equal(Type.Operator);
+    expect(rightNode.leftNode.value).to.equal(literal.Multiplication);
+    expect(rightNode.leftNode.leftNode.type).to.equal(Type.Value);
     expect(rightNode.leftNode.leftNode.value).to.equal(2);
-    expect(rightNode.leftNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.leftNode.rightNode.type).to.equal(Type.Value);
     expect(rightNode.leftNode.rightNode.value).to.equal(4);
-    expect(rightNode.rightNode.type).to.equal(Token.Type.Operator);
-    expect(rightNode.rightNode.subType).to.equal(Token.SubType.Group);
-    expect(rightNode.rightNode.value).to.equal(Token.literal.Subtraction);
-    expect(rightNode.rightNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.rightNode.type).to.equal(Type.Operator);
+    expect(rightNode.rightNode.subType).to.equal(SubType.Group);
+    expect(rightNode.rightNode.value).to.equal(literal.Subtraction);
+    expect(rightNode.rightNode.leftNode.type).to.equal(Type.Value);
     expect(rightNode.rightNode.leftNode.value).to.equal(2);
-    expect(rightNode.rightNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.rightNode.rightNode.type).to.equal(Type.Value);
     expect(rightNode.rightNode.rightNode.value).to.equal(4);
   });
 
@@ -258,103 +259,101 @@ describe("case: parse token with bracket", () => {
     const leftNode = ast.leftNode;
     const rightNode = ast.rightNode;
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Addition);
-    expect(leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Addition);
+    expect(leftNode.type).to.equal(Type.Value);
     expect(leftNode.value).to.equal(6);
-    expect(rightNode.type).to.equal(Token.Type.Operator);
-    expect(rightNode.value).to.equal(Token.literal.Multiplication);
-    expect(rightNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.type).to.equal(Type.Operator);
+    expect(rightNode.value).to.equal(literal.Multiplication);
+    expect(rightNode.leftNode.type).to.equal(Type.Value);
     expect(rightNode.leftNode.value).to.equal(2);
-    expect(rightNode.rightNode.type).to.equal(Token.Type.Operator);
-    expect(rightNode.rightNode.subType).to.equal(Token.SubType.Group);
-    expect(rightNode.rightNode.value).to.equal(Token.literal.Addition);
-    expect(rightNode.rightNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(rightNode.rightNode.type).to.equal(Type.Operator);
+    expect(rightNode.rightNode.subType).to.equal(SubType.Group);
+    expect(rightNode.rightNode.value).to.equal(literal.Addition);
+    expect(rightNode.rightNode.leftNode.type).to.equal(Type.Value);
     expect(rightNode.rightNode.leftNode.value).to.equal(3);
-    expect(rightNode.rightNode.rightNode.type).to.equal(Token.Type.Operator);
+    expect(rightNode.rightNode.rightNode.type).to.equal(Type.Operator);
     expect(rightNode.rightNode.rightNode.value).to.equal(
-      Token.literal.Multiplication,
+      literal.Multiplication,
     );
-    expect(rightNode.rightNode.rightNode.leftNode.type).to.equal(
-      Token.Type.Operator,
-    );
+    expect(rightNode.rightNode.rightNode.leftNode.type).to.equal(Type.Operator);
     expect(rightNode.rightNode.rightNode.leftNode.value).to.equal(
-      Token.literal.Multiplication,
+      literal.Multiplication,
     );
     expect(rightNode.rightNode.rightNode.leftNode.leftNode.type).to.equal(
-      Token.Type.Operator,
+      Type.Operator,
     );
     expect(rightNode.rightNode.rightNode.leftNode.leftNode.value).to.equal(
-      Token.literal.Multiplication,
+      literal.Multiplication,
     );
     expect(
       rightNode.rightNode.rightNode.leftNode.leftNode.leftNode.type,
-    ).to.equal(Token.Type.Operator);
+    ).to.equal(Type.Operator);
     expect(
       rightNode.rightNode.rightNode.leftNode.leftNode.leftNode.subType,
-    ).to.equal(Token.SubType.Group);
+    ).to.equal(SubType.Group);
     expect(
       rightNode.rightNode.rightNode.leftNode.leftNode.leftNode.value,
-    ).to.equal(Token.literal.Division);
+    ).to.equal(literal.Division);
     expect(
       rightNode.rightNode.rightNode.leftNode.leftNode.leftNode.leftNode.type,
-    ).to.equal(Token.Type.Value);
+    ).to.equal(Type.Value);
     expect(
       rightNode.rightNode.rightNode.leftNode.leftNode.leftNode.leftNode.value,
     ).to.equal(4);
     expect(
       rightNode.rightNode.rightNode.leftNode.leftNode.leftNode.rightNode.type,
-    ).to.equal(Token.Type.Value);
+    ).to.equal(Type.Value);
     expect(
       rightNode.rightNode.rightNode.leftNode.leftNode.leftNode.rightNode.value,
     ).to.equal(2);
     expect(
       rightNode.rightNode.rightNode.leftNode.leftNode.rightNode.type,
-    ).to.equal(Token.Type.Value);
+    ).to.equal(Type.Value);
     expect(
       rightNode.rightNode.rightNode.leftNode.leftNode.rightNode.value,
     ).to.equal(4);
     expect(rightNode.rightNode.rightNode.leftNode.rightNode.type).to.equal(
-      Token.Type.Operator,
+      Type.Operator,
     );
     expect(rightNode.rightNode.rightNode.leftNode.rightNode.subType).to.equal(
-      Token.SubType.Group,
+      SubType.Group,
     );
     expect(rightNode.rightNode.rightNode.leftNode.rightNode.value).to.equal(
-      Token.literal.Addition,
+      literal.Addition,
     );
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.leftNode.type,
-    ).to.equal(Token.Type.Value);
+    ).to.equal(Type.Value);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.leftNode.value,
     ).to.equal(2);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.type,
-    ).to.equal(Token.Type.Operator);
+    ).to.equal(Type.Operator);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.subType,
-    ).to.equal(Token.SubType.Group);
+    ).to.equal(SubType.Group);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.value,
-    ).to.equal(Token.literal.Addition);
+    ).to.equal(literal.Addition);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.leftNode.type,
-    ).to.equal(Token.Type.Value);
+    ).to.equal(Type.Value);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.leftNode.value,
     ).to.equal(4);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.rightNode.type,
-    ).to.equal(Token.Type.Operator);
+    ).to.equal(Type.Operator);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.rightNode
         .value,
-    ).to.equal(Token.literal.Multiplication);
+    ).to.equal(literal.Multiplication);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.rightNode
         .leftNode.type,
-    ).to.equal(Token.Type.Value);
+    ).to.equal(Type.Value);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.rightNode
         .leftNode.value,
@@ -362,14 +361,12 @@ describe("case: parse token with bracket", () => {
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.rightNode
         .rightNode.type,
-    ).to.equal(Token.Type.Value);
+    ).to.equal(Type.Value);
     expect(
       rightNode.rightNode.rightNode.leftNode.rightNode.rightNode.rightNode
         .rightNode.value,
     ).to.equal(6);
-    expect(rightNode.rightNode.rightNode.rightNode.type).to.equal(
-      Token.Type.Value,
-    );
+    expect(rightNode.rightNode.rightNode.rightNode.type).to.equal(Type.Value);
     expect(rightNode.rightNode.rightNode.rightNode.value).to.equal(2);
   });
 });
@@ -381,16 +378,16 @@ describe("case: parse token with advanced feature", () => {
     tokenAnalyzer.parse();
     const ast = tokenAnalyzer.getAst();
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Multiplication);
-    expect(ast.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Multiplication);
+    expect(ast.leftNode.type).to.equal(Type.Value);
     expect(ast.leftNode.value).to.equal(2);
-    expect(ast.rightNode.type).to.equal(Token.Type.Operator);
-    expect(ast.rightNode.subType).to.equal(Token.SubType.Group);
-    expect(ast.rightNode.value).to.equal(Token.literal.Multiplication);
-    expect(ast.rightNode.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.rightNode.type).to.equal(Type.Operator);
+    expect(ast.rightNode.subType).to.equal(SubType.Group);
+    expect(ast.rightNode.value).to.equal(literal.Multiplication);
+    expect(ast.rightNode.leftNode.type).to.equal(Type.Value);
     expect(ast.rightNode.leftNode.value).to.equal(3);
-    expect(ast.rightNode.rightNode.type).to.equal(Token.Type.Value);
+    expect(ast.rightNode.rightNode.type).to.equal(Type.Value);
     expect(ast.rightNode.rightNode.value).to.equal(4);
   });
 
@@ -406,11 +403,11 @@ describe("case: parse token with advanced feature", () => {
     tokenAnalyzer.parse();
     const ast = tokenAnalyzer.getAst();
 
-    expect(ast.type).to.equal(Token.Type.Operator);
-    expect(ast.value).to.equal(Token.literal.Multiplication);
-    expect(ast.leftNode.type).to.equal(Token.Type.Value);
+    expect(ast.type).to.equal(Type.Operator);
+    expect(ast.value).to.equal(literal.Multiplication);
+    expect(ast.leftNode.type).to.equal(Type.Value);
     expect(ast.leftNode.value).to.deep.equal(customInput);
-    expect(ast.rightNode.type).to.equal(Token.Type.Value);
+    expect(ast.rightNode.type).to.equal(Type.Value);
     expect(ast.rightNode.value).to.equal(2);
   });
 });
@@ -506,7 +503,7 @@ describe("case: parse with invalid data", () => {
   });
 
   it("should throw an emptyToken error with empty value", () => {
-    const data: Token.Token[] = [];
+    const data: Token[] = [];
     const tokenAnalyzer = new TokenAnalyzer(data);
 
     expect(() => tokenAnalyzer.parse())

@@ -1,4 +1,4 @@
-import { Token } from "./token";
+import type { Token } from "./token";
 import { TokenHelper } from "./token.helper";
 import type { ParserStack } from "../parser/parser.result";
 import { TokenValidator } from "./token.validator";
@@ -7,9 +7,9 @@ import { TokenError } from "./token.error";
 import type { Maybe } from "../types";
 
 export class TokenEnumerable {
-  private tokenStack: Token.Token[] = [];
+  private tokenStack: Token[] = [];
   private cursor = 0;
-  private currentToken: Token.Token;
+  private currentToken: Token;
 
   private _stack: Maybe<ParserStack> = undefined;
 
@@ -27,7 +27,7 @@ export class TokenEnumerable {
     this._nextStack = value;
   }
 
-  constructor(protected token: Token.Token[]) {}
+  constructor(protected token: Token[]) {}
 
   protected rewind(): void {
     this.cursor = 0;
@@ -42,7 +42,7 @@ export class TokenEnumerable {
     this.tokenStack = [];
   }
 
-  private calculateStack(token: Token.Token): void {
+  private calculateStack(token: Token): void {
     if (TokenHelper.isLineEscape(token)) {
       this.stack = {
         line: this._nextStack.line + 1,
@@ -62,18 +62,18 @@ export class TokenEnumerable {
     this.stack = undefined;
   }
 
-  protected addStack(token: Token.Token): void {
+  protected addStack(token: Token): void {
     this.tokenStack.push(token);
   }
 
-  protected popStack(): Token.Token | undefined {
+  protected popStack(): Token | undefined {
     return this.tokenStack.length
       ? this.tokenStack[this.tokenStack.length - 1]
       : undefined;
   }
 
   public next() {
-    const tokenStack: Token.Token = [];
+    const tokenStack: Token = [];
 
     if (this.cursor >= this.token.length) {
       return undefined;
@@ -82,7 +82,7 @@ export class TokenEnumerable {
     do {
       this.currentToken = this.findToken();
 
-      if (!TokenHelper.isUnkown(this.currentToken)) {
+      if (!TokenHelper.isUnknown(this.currentToken)) {
         tokenStack.push(this.currentToken);
       }
     } while (this.proceedNext());
@@ -104,24 +104,24 @@ export class TokenEnumerable {
     return this.isSequentialValue(token, nextToken);
   }
 
-  private isSequentialValue(token: Token.Token, nextToken: Token.Token) {
+  private isSequentialValue(token: Token, nextToken: Token) {
     const tokenType = TokenHelper.induceType(token);
     const nextTokenType = TokenHelper.induceType(nextToken);
 
     return (
-      (tokenType === Token.Type.Value &&
+      (tokenType === Type.Value &&
         TokenHelper.isNumeric(token) &&
         tokenType === nextTokenType) ||
-      (tokenType === Token.Type.Value &&
+      (tokenType === Type.Value &&
         TokenHelper.isNumeric(token) &&
-        nextTokenType === Token.Type.Dot) ||
-      (tokenType === Token.Type.Dot &&
+        nextTokenType === Type.Dot) ||
+      (tokenType === Type.Dot &&
         TokenHelper.isNumeric(nextToken) &&
-        nextTokenType === Token.Type.Value)
+        nextTokenType === Type.Value)
     );
   }
 
-  private findToken(): Token.Token {
+  private findToken(): Token | undefined {
     while (this.cursor < this.token.length) {
       const token = this.getToken();
       this.cursor += 1;
@@ -133,34 +133,34 @@ export class TokenEnumerable {
     }
   }
 
-  private getToken(): Token.Token {
+  private getToken(): Token {
     const token = this.token[this.cursor];
     return this.getAliasToken(token);
   }
 
-  private getAliasToken(token: Token.Token): Token.Token {
+  private getAliasToken(token: Token): Token {
     if (!TokenHelper.isOperator(token)) {
       return token;
     }
 
     return (
-      Object.keys(Token.value)
+      Object.keys(value)
         .map((operatorType) =>
-          Token.value[operatorType].symbols.includes(token)
-            ? Token.value[operatorType].alias
+          value[operatorType].symbols.includes(token)
+            ? value[operatorType].alias
             : undefined,
         )
         .find((alias) => alias !== undefined) || token
     );
   }
 
-  private isTokenArrayNumeric(tokens: Token.Token[]): boolean {
+  private isTokenArrayNumeric(tokens: Token[]): boolean {
     return tokens.every(
       (token) => TokenHelper.isNumeric(token) || TokenHelper.isDot(token),
     );
   }
 
-  private makeToken(tokens: Token.Token[]): Token.Token {
+  private makeToken(tokens: Token[]): Token | undefined {
     if (!tokens.length) {
       return undefined;
     }
@@ -179,7 +179,7 @@ export class TokenEnumerable {
     return tokens[0];
   }
 
-  private makeTokenString(tokens: Token.Token[]): string {
+  private makeTokenString(tokens: Token[]): string {
     return tokens
       .map((token) =>
         typeof token === "object" ? JSON.stringify(token) : token,

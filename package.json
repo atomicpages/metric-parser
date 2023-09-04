@@ -39,11 +39,11 @@
     "build": "npm-run-all -p build:*",
     "build:cjs": "esbuild --sourcemap --outdir=dist/cjs --format=cjs --target=node18 `./scripts/fd.sh`",
     "build:esm": "esbuild --sourcemap --outdir=dist/esm --format=esm --target=node18 `./scripts/fd.sh`",
-    "build:types": "tsc",
+    "build:types": "tsc -p tsconfig.build.json",
     "lint": "eslint 'src/**/*.ts'",
     "lint:fix": "eslint 'src/**/*.ts' --fix",
     "test": "vitest --run",
-    "typedoc": "typedoc --out docs --target es6 --theme minimal --mode file src --exclude **/*.spec.ts"
+    "typedoc": "typedoc --tsconfig tsconfig.build.json"
   },
   "devDependencies": {
     "@djthoms/eslint-config": "^6.0.1",
@@ -57,7 +57,7 @@
     "lint-staged": "^14.0.1",
     "npm-run-all": "^4.1.5",
     "ts-node": "^10.9.1",
-    "typedoc": "^0.11.1",
+    "typedoc": "^0.24.8",
     "typescript": "^5.1.6",
     "vitest": "^0.34.2"
   }

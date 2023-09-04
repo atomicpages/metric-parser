@@ -1,7 +1,8 @@
 {
   "extends": [
     "@djthoms/eslint-config",
-    "@djthoms/eslint-config/typescript"
+    "@djthoms/eslint-config/typescript",
+    "@djthoms/eslint-config/vitest"
   ],
   "parserOptions": {
     "project": "./tsconfig.json"

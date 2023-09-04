@@ -10,7 +10,7 @@ export enum TokenValidateLevel {
 }
 
 export class TokenValidator {
-  public static validateToken(token: Token.Token): ParserError | undefined {
+  public static validateToken(token: Token): ParserError | undefined {
     const level = TokenValidator.extractTokenLevel(token);
 
     if (level === TokenValidateLevel.Fatal) {
@@ -19,8 +19,8 @@ export class TokenValidator {
   }
 
   public static validateValueToken(
-    token: Token.Token,
-    prevToken: Token.Token,
+    token: Token,
+    prevToken: Token,
   ): ParserError | undefined {
     if (!prevToken) {
       return undefined;
@@ -38,9 +38,9 @@ export class TokenValidator {
     }
   }
 
-  private static extractTokenLevel(token: Token.Token) {
+  private static extractTokenLevel(token: Token) {
     const levelExtractors = [
-      { predicate: TokenHelper.isUnkown, level: TokenValidateLevel.Fatal },
+      { predicate: TokenHelper.isUnknown, level: TokenValidateLevel.Fatal },
       { predicate: TokenHelper.isToken, level: TokenValidateLevel.Pass },
     ];
 

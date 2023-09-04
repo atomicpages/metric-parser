@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { AbstractSyntaxTree } from "../../ast/ast";
 import { TokenHelper } from "../../token/token.helper";
-import { Token } from "../../token/token";
 import { TreeError } from "../tree.error";
 import { ParserError } from "../../error";
 import { TreeBuilderBase } from "../tree.base";
 import type { Node, Operand, Tree, Value, ValueObject } from "./type";
+import { Type } from "../../token/token";
+import type { Maybe } from "../../types";
 
 export class TreeBuilder extends TreeBuilderBase<Tree> {
-  public makeTree(ast: AbstractSyntaxTree): Tree {
+  public makeTree(ast: Maybe<AbstractSyntaxTree>): Tree {
     if (!ast) {
       throw new ParserError(TreeError.emptyAst);
     }
@@ -20,25 +22,26 @@ export class TreeBuilder extends TreeBuilderBase<Tree> {
     return tree as Tree;
   }
 
-  public makeAst(tree?: Tree): AbstractSyntaxTree {
+  public makeAst(tree?: Tree): Maybe<AbstractSyntaxTree> {
     if (!tree) {
       throw new ParserError(TreeError.emptyTree);
     }
 
     const ast = this.makeAstNode(tree);
-    if (!ast.isValid()) {
+
+    if (!ast?.isValid()) {
       throw new ParserError(TreeError.invalidParserTree);
     }
 
     return ast;
   }
 
-  private makeNode(node: AbstractSyntaxTree): Node | undefined {
+  private makeNode(node: Maybe<AbstractSyntaxTree>): Node | undefined {
     if (!node) {
       return undefined;
     }
 
-    return node.type === Token.Type.Operator
+    return node.type === Type.Operator
       ? this.makeOperatorNode(node)
       : this.makeValueNode(node);
   }
@@ -65,7 +68,7 @@ export class TreeBuilder extends TreeBuilderBase<Tree> {
     };
   }
 
-  private makeAstNode(node: Node): AbstractSyntaxTree {
+  private makeAstNode(node: Node): AbstractSyntaxTree | undefined {
     if (!node) {
       return undefined;
     }
@@ -73,8 +76,10 @@ export class TreeBuilder extends TreeBuilderBase<Tree> {
     if (TreeBuilder.isTree(node)) {
       const tree = node as Tree;
       const ast = new AbstractSyntaxTree(tree.operator);
+
       ast.leftNode = this.makeAstNode(tree.operand1);
       ast.rightNode = this.makeAstNode(tree.operand2);
+
       return ast;
     }
 
@@ -107,11 +112,10 @@ export class TreeBuilder extends TreeBuilderBase<Tree> {
   }
 
   private static isValidOperand(operand: Operand): boolean {
-    return (
-      operand &&
-      operand.value &&
-      operand.value.type &&
-      (operand.value as any)[operand.value.type] !== undefined
-    );
+    if (!operand?.value?.type) {
+      return false;
+    }
+
+    return operand.value[operand.value.type] !== undefined;
   }
 }

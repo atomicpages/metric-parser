@@ -1,13 +1,14 @@
 import { AbstractSyntaxTreeBase } from "./ast.base";
 import { TokenHelper } from "../token/token.helper";
-import { Token } from "../token/token";
+import { Type, literal } from "../token/token";
+import type { Maybe } from "../types";
 
 export class AbstractSyntaxTree extends AbstractSyntaxTreeBase {
   get expression(): string[] {
     return this.makeExpression();
   }
 
-  private getParentOperator(): AbstractSyntaxTree {
+  private getParentOperator(): Maybe<AbstractSyntaxTree> {
     if (this.isRoot()) {
       return undefined;
     }
@@ -17,6 +18,7 @@ export class AbstractSyntaxTree extends AbstractSyntaxTreeBase {
 
   private isNeededBracket(): boolean {
     const parentOperator = this.getParentOperator();
+
     return (
       parentOperator &&
       (TokenHelper.getPrecedenceDiff(parentOperator.value, this.value) > 0 ||
@@ -26,7 +28,7 @@ export class AbstractSyntaxTree extends AbstractSyntaxTreeBase {
   }
 
   private findOperator(): AbstractSyntaxTree {
-    if (this.type === Token.Type.Operator) {
+    if (this.type === Type.Operator) {
       return this;
     }
 
@@ -34,7 +36,7 @@ export class AbstractSyntaxTree extends AbstractSyntaxTreeBase {
   }
 
   private makeExpression(): string[] {
-    return this.type === Token.Type.Operator
+    return this.type === Type.Operator
       ? this.makeOperatorExpression()
       : this.makeValueExpression();
   }
@@ -57,10 +59,6 @@ export class AbstractSyntaxTree extends AbstractSyntaxTreeBase {
   }
 
   private wrapBracket(expression: string[]): string[] {
-    return [
-      Token.literal.BracketOpen,
-      ...expression,
-      Token.literal.BracketClose,
-    ];
+    return [literal.BracketOpen, ...expression, literal.BracketClose];
   }
 }

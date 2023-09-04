@@ -1,32 +1,32 @@
-import type { Token } from "../token/token";
+import type { SubType, Token, Type } from "../token/token";
 import { TokenHelper } from "../token/token.helper";
 
 export abstract class AbstractSyntaxTreeNode {
-  protected _value: Token.Token;
-  protected _leftNode: this;
-  protected _rightNode: this;
-  protected _parent: this;
-  protected _type: Token.Type;
-  protected _subType: Token.SubType;
+  protected _value: Token;
+  protected _leftNode: this | undefined;
+  protected _rightNode: this | undefined;
+  protected _parent: this | undefined;
+  protected _type: Type;
+  protected _subType: SubType;
 
-  get value(): Token.Token {
+  get value(): Token {
     return this._value;
   }
 
-  set value(value: Token.Token) {
+  set value(value: Token) {
     this._value = TokenHelper.isNumeric(value) ? Number(value) : value;
     this._type = TokenHelper.induceType(this.value);
   }
 
-  get type(): Token.Type {
+  get type(): Type {
     return this._type;
   }
 
-  get subType(): Token.SubType {
+  get subType(): SubType {
     return this._subType;
   }
 
-  set subType(value: Token.SubType) {
+  set subType(value: SubType) {
     this._subType = value;
   }
 
@@ -38,7 +38,7 @@ export abstract class AbstractSyntaxTreeNode {
     this._parent = value;
   }
 
-  get leftNode(): this {
+  get leftNode(): this | undefined {
     return this._leftNode;
   }
 
@@ -51,7 +51,7 @@ export abstract class AbstractSyntaxTreeNode {
     node.parent = this;
   }
 
-  get rightNode(): this {
+  get rightNode(): this | undefined {
     return this._rightNode;
   }
 
@@ -64,7 +64,7 @@ export abstract class AbstractSyntaxTreeNode {
     node.parent = this;
   }
 
-  public constructor(value?: Token.Token) {
+  public constructor(value?: Token) {
     if (value) {
       this.value = value;
     }

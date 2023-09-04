@@ -1,7 +1,7 @@
 import type { AbstractSyntaxTree } from "./ast";
 import { ParserError } from "../error";
 import { TokenError } from "../token/token.error";
-import { Token } from "../token/token";
+import { Token, Type } from "../token/token";
 import { TokenHelper } from "../token/token.helper";
 
 export class AbstractSyntaxTreeValidator {
@@ -35,7 +35,7 @@ export class AbstractSyntaxTreeValidator {
   private static validateCurrentMissingValue(
     ast: AbstractSyntaxTree,
   ): ParserError | undefined {
-    if (ast.type !== Token.Type.Operator || (ast.leftNode && ast.rightNode)) {
+    if (ast.type !== Type.Operator || (ast.leftNode && ast.rightNode)) {
       return;
     }
 

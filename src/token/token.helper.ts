@@ -1,24 +1,27 @@
-import { Token } from "./token";
+/* eslint-disable @typescript-eslint/unbound-method */
+import type { Token } from "./token";
+import { Type } from "./token";
 import { TokenHelperBase } from "./token.helper.base";
 
 export class TokenHelper extends TokenHelperBase {
-  public static induceType(token: Token.Token): Token.Type {
+  public static induceType(token: Token): Type {
     const typeInducers = [
-      { predicate: TokenHelper.isUnkown, type: Token.Type.Unknown },
-      { predicate: TokenHelper.isWhiteSpace, type: Token.Type.WhiteSpace },
-      { predicate: TokenHelper.isOperator, type: Token.Type.Operator },
-      { predicate: TokenHelper.isBracket, type: Token.Type.Bracket },
-      { predicate: TokenHelper.isDot, type: Token.Type.Dot },
-      { predicate: TokenHelper.isValue, type: Token.Type.Value },
+      { predicate: TokenHelper.isUnknown, type: Type.Unknown },
+      { predicate: TokenHelper.isWhiteSpace, type: Type.WhiteSpace },
+      { predicate: TokenHelper.isOperator, type: Type.Operator },
+      { predicate: TokenHelper.isBracket, type: Type.Bracket },
+      { predicate: TokenHelper.isDot, type: Type.Dot },
+      { predicate: TokenHelper.isValue, type: Type.Value },
     ];
 
     const extractedToken = typeInducers.find((inducer) =>
       inducer.predicate(token),
     );
-    return extractedToken ? extractedToken.type : Token.Type.Unknown;
+
+    return extractedToken ? extractedToken.type : Type.Unknown;
   }
 
-  public static getPrecedence(token: Token.Token): number {
+  public static getPrecedence(token: Token): number {
     return [
       [TokenHelper.isAddition, TokenHelper.isSubtraction],
       [TokenHelper.isMultiplication, TokenHelper.isDivision],
@@ -27,10 +30,7 @@ export class TokenHelper extends TokenHelperBase {
     ].findIndex((predicate) => predicate.some((func) => func(token)));
   }
 
-  public static getPrecedenceDiff(
-    source: Token.Token,
-    target: Token.Token,
-  ): number {
+  public static getPrecedenceDiff(source: Token, target: Token): number {
     return (
       TokenHelper.getPrecedence(source) - TokenHelper.getPrecedence(target)
     );
